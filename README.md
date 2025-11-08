@@ -103,3 +103,10 @@ flutter run -d chrome
 
 ## Licença
 Projeto de uso pessoal/demonstração. (Adapte conforme necessidade.)
+
+## Instalação via APK (Documentos)
+Para distribuição direta, você pode usar o APK já salvo em `Documentos`.
+
+- Caminho: `C:\Users\reinaldo\Documents\ContagemAssistenciaTeocratica-app-release.apk`
+- Ative "Permitir apps desconhecidos" no Android (Arquivos/Drive).
+- Abra o APK e confirme a instalação.
