@@ -1,6 +1,15 @@
 # Contagem de Assistência Teocrática
 
+![Flutter](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter&logoColor=white) ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white) ![Android](https://img.shields.io/badge/Android-API%2026%2B-3DDC84?logo=android&logoColor=white) ![Web](https://img.shields.io/badge/Web-GitHub%20Pages-000000?logo=github&logoColor=white)
+
 Aplicativo Flutter para registrar e consultar contagens de assistência de reuniões teocráticas, com exportação de dados e demonstração Web (GitHub Pages).
+
+## Demo Web
+Teste diretamente no navegador:
+
+- URL: https://reinaldobarreto.github.io/contagem_assistencia_teocratica/
+
+Se o repositório usar outro nome, ajuste o `--base-href` no workflow e atualize o link acima.
 
 ## Finalidade
 - Registrar rapidamente ocupação e indicadores por reunião.
@@ -20,16 +29,22 @@ Aplicativo Flutter para registrar e consultar contagens de assistência de reuni
 - Registros: buscar/filtrar/ordenar e exportar os registros.
 
 ## Capturas de tela
-As imagens devem ser colocadas em `docs/images/` e referenciadas abaixo.
+As imagens devem ser colocadas em `docs/images/` e referenciadas abaixo. Personalize com capturas reais do app.
 
-Exemplos esperados:
+Exemplos sugeridos:
 - `docs/images/contagem.png`
 - `docs/images/registros.png`
 
 ```markdown
-![Tela Contagem](docs/images/contagem.png)
-![Tela Registros](docs/images/registros.png)
+![Tela Contagem — Flutter/Dart](docs/images/contagem.png)
+![Tela Registros — Exportações CSV/PNG](docs/images/registros.png)
 ```
+
+## Tecnologias
+- Flutter 3.x (`mobile-first` e build Web)
+- Dart 3.x
+- Android (APK release)
+- GitHub Pages (deploy Web automático)
 
 ## Pré‑requisitos
 - Flutter SDK (canal estável): https://flutter.dev/docs/get-started/install
@@ -125,3 +140,7 @@ Para distribuição direta, você pode usar o APK já salvo em `Documentos`.
 - Caminho: `C:\Users\reinaldo\Documents\ContagemAssistenciaTeocratica-app-release.apk`
 - Ative "Permitir apps desconhecidos" no Android (Arquivos/Drive).
 - Abra o APK e confirme a instalação.
+
+## Links rápidos
+- Demo Web (Pages): https://reinaldobarreto.github.io/contagem_assistencia_teocratica/
+- APK local (Windows): `C:\Users\reinaldo\Documents\ContagemAssistenciaTeocratica-app-release.apk`
