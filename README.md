@@ -87,6 +87,21 @@ flutter run -d chrome
 - `docs/images/`: capturas para README.
 - `.github/workflows/deploy.yml`: publicação automática no GitHub Pages.
 
+## Testes
+Execute os testes unitários/localizados:
+```powershell
+flutter test
+```
+Testes principais:
+- `test/csv_test.dart`: valida geração de CSV.
+- `test/records_flow_csv_real_data_test.dart`: fluxo real de dados.
+- `test/widget_test.dart`: validações de widget.
+
+## Troubleshooting (GitHub Pages)
+- Caminho do site: `https://<usuario>.github.io/<repo>/`
+- Se 404 ou assets quebrados, confirme o `--base-href` igual a `/<repo>/`.
+- Verifique o workflow na aba Actions e logs de build/deploy.
+
 ## Como contribuir
 - Abra issues com sugestões e bugs.
 - Use commits descritivos (ver exemplos abaixo).
