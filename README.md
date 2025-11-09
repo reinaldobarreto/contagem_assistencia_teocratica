@@ -59,6 +59,15 @@ Sugestão de nomes dos arquivos enviados:
 - `docs/images/registros-filtros-2.png` (tela Registros com filtros avançados — exemplo 2)
 - `docs/images/registros-lista.png` (lista de registros com opção Exportar)
 
+### Como adicionar rapidamente (screenshots)
+1. Faça as capturas no dispositivo/emulador (PNG/JPG).
+2. Salve os arquivos na pasta `docs/images/` com os nomes padronizados acima.
+3. Faça commit e push para ver as imagens renderizadas no README.
+
+Dica: você pode usar HTML no README para imagens lado a lado (como na galeria) e controlar a largura via atributo `width`.
+
+Observação: as imagens aparecem diretamente no README do GitHub (independente do GitHub Pages). GitHub Pages afeta apenas a demo publicada.
+
 ### Galeria rápida
 Visual do app em uma grade compacta para leitura rápida:
 
@@ -143,6 +152,10 @@ flutter build apk --release
 # APK gerado em build\app\outputs\flutter-apk\app-release.apk
 ```
 
+## Execução rápida por linha de comando
+- Web (Chrome): `flutter run -d chrome`
+- Android (emulador/dispositivo): `flutter run`
+
 ## Instalação de APK em dispositivo (opcional)
 ```powershell
 adb install -r build\app\outputs\flutter-apk\app-release.apk
@@ -212,6 +225,9 @@ Testes principais:
 
 ## Licença
 Projeto de uso pessoal/demonstração. (Adapte conforme necessidade.)
+
+## Autor
+Reinaldo Barreto — Flutter/Dart
 
 ## Instalação via APK (Documentos)
 Para distribuição direta, você pode usar o APK já salvo em `Documentos`.
