@@ -4,6 +4,11 @@
 
 Aplicativo Flutter para registrar e consultar contagens de assistência de reuniões teocráticas, com exportação de dados e demonstração Web (GitHub Pages).
 
+## Overview
+- Stack principal: Flutter/Dart (mobile-first + build Web para demo)
+- Deploy: GitHub Pages automatizado via GitHub Actions (base-href dinâmico)
+- Foco: registro rápido de contagens e consulta/exportação de registros
+
 ## Demo Web
 Teste diretamente no navegador:
 
@@ -54,22 +59,69 @@ Sugestão de nomes dos arquivos enviados:
 - `docs/images/registros-filtros-2.png` (tela Registros com filtros avançados — exemplo 2)
 - `docs/images/registros-lista.png` (lista de registros com opção Exportar)
 
-## Tecnologias
-- Flutter 3.x (`mobile-first` e build Web)
+### Galeria rápida
+Visual do app em uma grade compacta para leitura rápida:
+
+<p>
+  <img src="docs/images/contagem.png" alt="Contagem" width="32%"/>
+  <img src="docs/images/auditorio-config-1.png" alt="Auditório Config 1" width="32%"/>
+  <img src="docs/images/auditorio-config-2.png" alt="Auditório Config 2" width="32%"/>
+</p>
+<p>
+  <img src="docs/images/auditorio-preferencias.png" alt="Auditório Preferências" width="32%"/>
+  <img src="docs/images/registros-filtros-1.png" alt="Registros Filtros 1" width="32%"/>
+  <img src="docs/images/registros-filtros-2.png" alt="Registros Filtros 2" width="32%"/>
+  <img src="docs/images/registros-lista.png" alt="Registros Lista" width="32%"/>
+</p>
+
+## Tecnologias e Ferramentas
+- Flutter 3.x (mobile-first + build Web para demo)
 - Dart 3.x
 - Android (APK release)
-- GitHub Pages (deploy Web automático)
+- GitHub Pages via GitHub Actions
+- VS Code/Android Studio, emuladores e dispositivos físicos
 
 ## Pré‑requisitos
 - Flutter SDK (canal estável): https://flutter.dev/docs/get-started/install
 - Android SDK/Emulador ou dispositivo físico com depuração USB.
 
-## Como clonar e configurar
+## Como clonar e importar (VS Code e Android Studio)
+Requisitos:
+- Flutter stable (3.x) e Dart SDK (incluso no Flutter)
+- Git instalado
+- VS Code com extensões: Flutter e Dart
+- Android Studio com Android SDK e AVD (emulador) configurados
+- Navegador Chrome (para executar em Web)
+
+Verifique o ambiente:
 ```powershell
-git clone <URL-do-repo>
+flutter doctor
+```
+
+Clonar o projeto:
+```powershell
+git clone https://github.com/reinaldobarreto/contagem_assistencia_teocratica.git
 cd contagem_assistencia_teocratica
 flutter pub get
 ```
+
+Habilitar Web (uma vez):
+```powershell
+flutter config --enable-web
+```
+
+Importar e rodar no VS Code:
+- Abra o projeto: `code .`
+- Selecione o dispositivo: `Ctrl+Shift+P → Flutter: Select Device → Chrome (ou emulador Android)`
+- Rode o app: `F5` ou `flutter run -d chrome`
+
+Importar e rodar no Android Studio:
+- File → Open... e selecione a pasta `contagem_assistencia_teocratica`
+- Instale plugins Flutter e Dart se solicitado
+- Aceite licenças do Android: `flutter doctor --android-licenses`
+- Crie/abra um emulador: AVD Manager → crie um dispositivo (ex.: Pixel 5 API 34)
+- Baixe dependências: `flutter pub get`
+- Rode: selecione o emulador no topo e clique em Run
 
 ## Executar em desenvolvimento
 ```powershell
@@ -95,15 +147,18 @@ adb install -r build\app\outputs\flutter-apk\app-release.apk
 - Exportar CSV (filtrados): compartilha texto CSV.
 - Exportar PNG (filtrados): compartilha imagem da lista filtrada.
 
-## Demonstração Web (GitHub Pages)
-Este projeto inclui um workflow para publicar automaticamente o build Web.
+## Publicação (GitHub Pages)
+Este projeto inclui um workflow que compila e publica automaticamente em GitHub Pages.
 
-### Passo a passo
-1. Crie o repositório no GitHub e empurre o código.
-2. A primeira execução do workflow criará/atualizará o GitHub Pages.
-3. Acesse: `https://<seu-usuario>.github.io/<nome-do-repo>/`
+Passos:
+1. Faça push para `main` com o workflow presente.
+2. No GitHub, vá em `Settings → Pages → Build and deployment → Source` e selecione `GitHub Actions`.
+3. Acompanhe a execução em `Actions`: "Deploy Flutter Web to GitHub Pages".
+4. Acesse: `https://<seu-usuario>.github.io/<nome-do-repo>/`.
 
-Observação: o workflow define `--base-href` automaticamente para o nome do repositório.
+Observações:
+- O workflow define `--base-href` automaticamente para o nome do repositório.
+- Use o badge de status para verificar o deploy.
 
 ## Desenvolvimento local (Web)
 ```powershell
@@ -125,6 +180,11 @@ Testes principais:
 - `test/csv_test.dart`: valida geração de CSV.
 - `test/records_flow_csv_real_data_test.dart`: fluxo real de dados.
 - `test/widget_test.dart`: validações de widget.
+
+## Problemas comuns
+- Se Gradle/SDK falhar: `flutter clean && flutter pub get`
+- Se não encontrar Android SDK: abra o Android Studio para instalar SDK/Platform Tools e execute `flutter doctor` novamente
+- Se a URL do Pages retornar 404: aguarde 1–2 minutos após o deploy ou confirme se o workflow terminou com sucesso
 
 ## Troubleshooting (GitHub Pages)
 - Caminho do site: `https://<usuario>.github.io/<repo>/`
