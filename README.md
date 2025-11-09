@@ -137,6 +137,41 @@ Importar e rodar no Android Studio:
 - Baixe dependências: `flutter pub get`
 - Rode: selecione o emulador no topo e clique em Run
 
+## Guia passo a passo (VS Code)
+- Instale extensões: `Flutter` e `Dart`.
+- Abra a pasta do projeto: `code .`.
+- Baixe dependências: `flutter pub get`.
+- Habilite Web (uma vez): `flutter config --enable-web`.
+- Selecione o dispositivo: `Ctrl+Shift+P → Flutter: Select Device → Chrome` (ou um emulador Android).
+- Execute:
+  - Web: `F5` ou `flutter run -d chrome`.
+  - Android: `flutter run` com um dispositivo/emulador selecionado.
+- Hot reload: `r` no terminal do Flutter ou ícone de reload no VS Code.
+- Hot restart: `R` no terminal do Flutter.
+
+Para Android físico:
+- Ative a Depuração USB no dispositivo.
+- Conecte por cabo, aceite a impressão digital.
+- Verifique se aparece em `flutter devices`.
+
+Para Android emulador:
+- Crie um AVD no Android Studio (AVD Manager, ex.: Pixel 5 API 34) e inicie.
+- Selecione o emulador no VS Code e execute.
+
+## Guia passo a passo (Android Studio)
+- Abra: `File → Open...` e selecione a pasta do projeto.
+- Instale plugins Flutter e Dart se solicitado.
+- SDK Manager: instale Android SDK/Platform Tools (ex.: API 34).
+- Aceite licenças: `flutter doctor --android-licenses`.
+- AVD Manager: crie um emulador (ex.: Pixel 5 API 34) e inicie.
+- Baixe dependências: `flutter pub get`.
+- Execute: selecione o dispositivo/emulador no topo e clique em `Run`.
+
+Dicas:
+- Terminal integrado: `View → Tool Windows → Terminal` para rodar `flutter`.
+- Se Gradle/SDK falhar: `flutter clean && flutter pub get`.
+- Se o Android SDK não for encontrado: instale via Android Studio e rode `flutter doctor` novamente.
+
 ## Executar em desenvolvimento
 ```powershell
 # Emulador Chrome (Web)
