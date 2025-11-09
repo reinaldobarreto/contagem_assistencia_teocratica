@@ -227,6 +227,30 @@ Observações:
 - O workflow define `--base-href` automaticamente para o nome do repositório.
 - Use o badge de status para verificar o deploy.
 
+### Fluxo de deploy (mini)
+Você pode publicar de duas formas. O diagrama abaixo resume:
+
+```mermaid
+flowchart TD
+  A[Push para main] --> B[GitHub Actions: build web]
+  B --> C[Upload artifact]
+  C --> D[Deploy Pages]
+  D --> E[Site ativo em /contagem_assistencia_teocratica/]
+
+  subgraph Alternativa local
+    F[flutter build web --release] --> G[git push origin gh-pages]
+    G --> E
+  end
+```
+
+### Links úteis
+- Repo: https://github.com/reinaldobarreto/contagem_assistencia_teocratica
+- README: https://github.com/reinaldobarreto/contagem_assistencia_teocratica/blob/main/README.md
+- Site (Pages): https://reinaldobarreto.github.io/contagem_assistencia_teocratica/
+- Settings → Pages: https://github.com/reinaldobarreto/contagem_assistencia_teocratica/settings/pages
+- Actions → Deploy: https://github.com/reinaldobarreto/contagem_assistencia_teocratica/actions/workflows/deploy.yml
+- Branch de publicação: `gh-pages` (raiz)
+
 ## Desenvolvimento local (Web)
 ```powershell
 flutter run -d chrome
