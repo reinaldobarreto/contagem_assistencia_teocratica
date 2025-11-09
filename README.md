@@ -95,6 +95,20 @@ Visual do app em uma grade compacta para leitura rápida:
 - Análise estática: `analysis_options.yaml` com lints do Flutter/Dart
 - Estrutura de assets: `docs/images` (screenshots do README) e `web/` (ícones/manifest)
 
+### Ícones da stack
+Ícones espelhados do fintrack360 (Simple Icons via shields.io):
+
+<p>
+  <img alt="Flutter" src="https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white" />
+  <img alt="Dart" src="https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white" />
+  <img alt="Android" src="https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white" />
+  <img alt="Android Studio" src="https://img.shields.io/badge/Android%20Studio-3DDC84?logo=androidstudio&logoColor=white" />
+  <img alt="Chrome" src="https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white" />
+  <img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-007ACC?logo=visualstudiocode&logoColor=white" />
+  <img alt="GitHub Actions" src="https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=white" />
+  <img alt="GitHub Pages" src="https://img.shields.io/badge/GitHub%20Pages-222?logo=githubpages&logoColor=white" />
+</p>
+
 ## Pré‑requisitos
 - Flutter SDK (canal estável): https://flutter.dev/docs/get-started/install
 - Android SDK/Emulador ou dispositivo físico com depuração USB.
