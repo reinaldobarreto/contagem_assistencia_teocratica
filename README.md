@@ -75,11 +75,16 @@ Visual do app em uma grade compacta para leitura rápida:
 </p>
 
 ## Tecnologias e Ferramentas
-- Flutter 3.x (mobile-first + build Web para demo)
-- Dart 3.x
-- Android (APK release)
-- GitHub Pages via GitHub Actions
-- VS Code/Android Studio, emuladores e dispositivos físicos
+- Stack principal: Flutter 3.x / Dart 3.x (mobile-first + build Web para demo)
+- Plataformas: Android (API 26+) e Web (Chrome)
+- Persistência: `SharedPreferences` (local, sem backend)
+- Exportação: CSV e PNG (lista filtrada) integradas ao app
+- Testes: `flutter test` para CSV, fluxo real de dados e widgets
+- Deploy: GitHub Pages automatizado via GitHub Actions (`actions/deploy-pages@v4`)
+- CI/CD: badge de status do workflow de deploy no README
+- Ferramentas: VS Code, Android Studio, Git
+- Análise estática: `analysis_options.yaml` com lints do Flutter/Dart
+- Estrutura de assets: `docs/images` (screenshots do README) e `web/` (ícones/manifest)
 
 ## Pré‑requisitos
 - Flutter SDK (canal estável): https://flutter.dev/docs/get-started/install
