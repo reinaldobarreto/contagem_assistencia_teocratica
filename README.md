@@ -29,16 +29,26 @@ Se o repositório usar outro nome, ajuste o `--base-href` no workflow e atualize
 - Registros: buscar/filtrar/ordenar e exportar os registros.
 
 ## Capturas de tela
-As imagens devem ser colocadas em `docs/images/` e referenciadas abaixo. Personalize com capturas reais do app.
-
-Exemplos sugeridos:
-- `docs/images/contagem.png`
-- `docs/images/registros.png`
+Use as 7 imagens correspondentes às telas, nesta ordem: Contagem, Auditório, Registros.
 
 ```markdown
-![Tela Contagem — Flutter/Dart](docs/images/contagem.png)
-![Tela Registros — Exportações CSV/PNG](docs/images/registros.png)
+![Contagem](docs/images/contagem.png)
+![Auditório — Configuração 1](docs/images/auditorio-config-1.png)
+![Auditório — Configuração 2](docs/images/auditorio-config-2.png)
+![Auditório — Preferências](docs/images/auditorio-preferencias.png)
+![Registros — Filtros avançados 1](docs/images/registros-filtros-1.png)
+![Registros — Filtros avançados 2](docs/images/registros-filtros-2.png)
+![Registros — Lista e Exportar](docs/images/registros-lista.png)
 ```
+
+Sugestão de nomes dos arquivos enviados:
+- `docs/images/contagem.png` (primeira tela — Contagem)
+- `docs/images/auditorio-config-1.png` (configuração do auditório — parte 1)
+- `docs/images/auditorio-config-2.png` (configuração do auditório — parte 2)
+- `docs/images/auditorio-preferencias.png` (preferências do auditório)
+- `docs/images/registros-filtros-1.png` (tela Registros com filtros avançados — exemplo 1)
+- `docs/images/registros-filtros-2.png` (tela Registros com filtros avançados — exemplo 2)
+- `docs/images/registros-lista.png` (lista de registros com opção Exportar)
 
 ## Tecnologias
 - Flutter 3.x (`mobile-first` e build Web)
