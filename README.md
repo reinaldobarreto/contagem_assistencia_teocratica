@@ -2,12 +2,17 @@
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter&logoColor=white) ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white) ![Android](https://img.shields.io/badge/Android-API%2026%2B-3DDC84?logo=android&logoColor=white) ![Web](https://img.shields.io/badge/Web-GitHub%20Pages-000000?logo=github&logoColor=white)
 
-<p>
+<p align="center">
+  <a href="https://reinaldobarreto.github.io/contagem_assistencia_teocratica/" target="_blank"><img alt="Abrir App Web" src="https://img.shields.io/badge/Abrir%20App%20Web-Online-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white" /></a>
+  <a href="#desenvolvimento-local-web"><img alt="Executar no Chrome" src="https://img.shields.io/badge/Executar%20no%20Chrome-Dev-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white" /></a>
+  <a href="https://drive.google.com/file/d/1SeX86iem6Z61HLQVL_AndkeKY2Sem0or/view?usp=drive_link" target="_blank"><img alt="Baixar APK" src="https://img.shields.io/badge/Baixar%20APK-Download-3DDC84?style=for-the-badge&logo=android&logoColor=white" /></a>
+</p>
+
+<p align="center">
   <a href="https://developer.android.com/studio" target="_blank"><img alt="ANDROID STUDIO" src="https://img.shields.io/badge/ANDROID%20STUDIO-Open-3DDC84?style=for-the-badge&logo=androidstudio&logoColor=white" /></a>
   <a href="https://code.visualstudio.com/" target="_blank"><img alt="VS CODE" src="https://img.shields.io/badge/VS%20CODE-Open-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white" /></a>
   <a href="https://flutter.dev/" target="_blank"><img alt="FLUTTER" src="https://img.shields.io/badge/FLUTTER-Docs-02569B?style=for-the-badge&logo=flutter&logoColor=white" /></a>
   <a href="https://dart.dev/" target="_blank"><img alt="DART" src="https://img.shields.io/badge/DART-Docs-0175C2?style=for-the-badge&logo=dart&logoColor=white" /></a>
-  <a href="https://reinaldobarreto.github.io/contagem_assistencia_teocratica/" target="_blank"><img alt="Abrir App Web" src="https://img.shields.io/badge/Abrir%20App%20Web-Online-6f42c1?style=for-the-badge&logo=google-chrome&logoColor=white" /></a>
 </p>
 
 Aplicativo Flutter para registrar e consultar contagens de assistência de reuniões teocráticas, com exportação de dados e demonstração Web (GitHub Pages).
