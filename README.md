@@ -29,17 +29,17 @@ Se o repositório usar outro nome, ajuste o `--base-href` no workflow e atualize
 - Registros: buscar/filtrar/ordenar e exportar os registros.
 
 ## Capturas de tela
-Use as 7 imagens correspondentes às telas, nesta ordem: Contagem, Auditório, Registros.
+Ordem: Contagem, Auditório, Registros. Cada imagem abaixo é real e segue os nomes padronizados.
 
-```markdown
-![Contagem](docs/images/contagem.png)
-![Auditório — Configuração 1](docs/images/auditorio-config-1.png)
-![Auditório — Configuração 2](docs/images/auditorio-config-2.png)
+![Contagem — Registrar ocupação e indicadores](docs/images/contagem.png)
+
+![Auditório — Configuração (parte 1)](docs/images/auditorio-config-1.png)
+![Auditório — Configuração (parte 2)](docs/images/auditorio-config-2.png)
 ![Auditório — Preferências](docs/images/auditorio-preferencias.png)
-![Registros — Filtros avançados 1](docs/images/registros-filtros-1.png)
-![Registros — Filtros avançados 2](docs/images/registros-filtros-2.png)
-![Registros — Lista e Exportar](docs/images/registros-lista.png)
-```
+
+![Registros — Filtros avançados (exemplo 1)](docs/images/registros-filtros-1.png)
+![Registros — Filtros avançados (exemplo 2)](docs/images/registros-filtros-2.png)
+![Registros — Lista com Exportar](docs/images/registros-lista.png)
 
 Sugestão de nomes dos arquivos enviados:
 - `docs/images/contagem.png` (primeira tela — Contagem)
