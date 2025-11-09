@@ -9,6 +9,10 @@ Teste diretamente no navegador:
 
 - URL: https://reinaldobarreto.github.io/contagem_assistencia_teocratica/
 
+[![Abrir versão Web](https://img.shields.io/badge/Abrir%20vers%C3%A3o%20Web-Visitar-6f42c1?style=for-the-badge&logo=google-chrome&logoColor=white)](https://reinaldobarreto.github.io/contagem_assistencia_teocratica/)
+
+[![Status do Deploy](https://github.com/reinaldobarreto/contagem_assistencia_teocratica/actions/workflows/deploy.yml/badge.svg)](https://github.com/reinaldobarreto/contagem_assistencia_teocratica/actions/workflows/deploy.yml)
+
 Se o repositório usar outro nome, ajuste o `--base-href` no workflow e atualize o link acima.
 
 ## Finalidade
