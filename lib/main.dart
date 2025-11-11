@@ -430,12 +430,12 @@ class _HomeShellState extends State<HomeShell> {
         ShortcutItem(
           type: 'send_card',
           localizedTitle: 'Enviar cartão',
-          icon: 'launcher_icon',
+          icon: 'shortcut_icon_v2',
         ),
         ShortcutItem(
           type: 'save_record',
           localizedTitle: 'Salvar registro',
-          icon: 'launcher_icon',
+          icon: 'shortcut_icon_v2',
         ),
       ]);
     }
@@ -1179,6 +1179,7 @@ class _CountScreenState extends State<_CountScreen> {
   // Modo filtrado: exibe somente a fileira/bloco selecionado pelo carrossel
   final bool _filteredMode = true;
   final Set<int> _pressed = <int>{};
+  bool _showGridOverlay = false;
 
   void _snapToNearest(double viewportWidth) {
     // Alinha suavemente a rolagem ao múltiplo exato da largura de uma célula
@@ -1197,6 +1198,24 @@ class _CountScreenState extends State<_CountScreen> {
         curve: Curves.easeOut,
       );
     }
+  }
+
+  void _scrollToCenterForContent({
+    required double viewportWidth,
+    required double contentWidth,
+  }) {
+    final double extra = (contentWidth - viewportWidth);
+    double target = extra <= 0 ? 0.0 : extra / 2.0;
+    final double maxExtent = _hCtrl.position.maxScrollExtent;
+    if (target > maxExtent) target = maxExtent;
+    if (target < 0) target = 0;
+    _hCtrl
+        .animateTo(
+          target,
+          duration: const Duration(milliseconds: 240),
+          curve: Curves.easeOut,
+        )
+        .then((_) => _snapToNearest(viewportWidth));
   }
 
   @override
@@ -1812,102 +1831,155 @@ class _CountScreenState extends State<_CountScreen> {
                   final bool showLeft = leftHidden > 0;
                   final bool showRight = rightHidden > 0;
 
-                  return Align(
-                    alignment: Alignment.topCenter,
-                    child: NotificationListener<ScrollNotification>(
-                      onNotification: (n) {
-                        if (n is ScrollEndNotification) {
-                          _snapToNearest(constraints.maxWidth);
-                        }
-                        setState(() {});
-                        return false;
-                      },
-                      child: Stack(
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Align(
                         alignment: Alignment.topCenter,
-                        children: [
-                          ScrollConfiguration(
-                            behavior: _NoGlowBehavior(),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              controller: _hCtrl,
-                              physics: const ClampingScrollPhysics(),
-                              dragStartBehavior: DragStartBehavior.down,
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  minWidth: constraints.maxWidth,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 44.0,
-                                  ),
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: contentWidth,
-                                      child: Material(
-                                        elevation: 12,
-                                        shadowColor:
-                                            Theme.of(context).shadowColor,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: (n) {
+                            if (n is ScrollEndNotification) {
+                              _snapToNearest(constraints.maxWidth);
+                            }
+                            setState(() {});
+                            return false;
+                          },
+                          child: Stack(
+                            alignment: Alignment.topCenter,
+                            children: [
+                              ScrollConfiguration(
+                                behavior: _NoGlowBehavior(),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  controller: _hCtrl,
+                                  physics: const ClampingScrollPhysics(),
+                                  dragStartBehavior: DragStartBehavior.down,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minWidth: constraints.maxWidth,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 44.0,
+                                      ),
+                                      child: Center(
+                                        child: SizedBox(
+                                          width: contentWidth,
+                                          child: Material(
+                                            elevation: 12,
+                                            shadowColor:
+                                                Theme.of(context).shadowColor,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            clipBehavior: Clip.antiAlias,
+                                            child: grid,
+                                          ),
                                         ),
-                                        clipBehavior: Clip.antiAlias,
-                                        child: grid,
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 4,
-                            top: 0,
-                            bottom: 0,
-                            child: Center(
-                              child: GestureDetector(
-                                onTap: showLeft
-                                    ? () {
-                                        _scrollByViewport(
-                                          toRight: false,
-                                          viewportWidth: constraints.maxWidth,
-                                        );
-                                      }
-                                    : null,
-                                child: _OverflowHint(
-                                  visible: showLeft,
-                                  direction: AxisDirection.left,
-                                  count: leftHidden,
+                              if (_showGridOverlay)
+                                Positioned.fill(
+                                  child: IgnorePointer(
+                                    child: GridPaper(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outlineVariant
+                                          .withValues(alpha: 0.18),
+                                      interval: seatCellWidth + crossSpacing,
+                                      divisions: 1,
+                                      subdivisions: 4,
+                                    ),
+                                  ),
+                                ),
+                              Positioned(
+                                left: 4,
+                                top: 0,
+                                bottom: 0,
+                                child: Center(
+                                  child: GestureDetector(
+                                    onTap: showLeft
+                                        ? () {
+                                            _scrollByViewport(
+                                              toRight: false,
+                                              viewportWidth:
+                                                  constraints.maxWidth,
+                                            );
+                                          }
+                                        : null,
+                                    child: _OverflowHint(
+                                      visible: showLeft,
+                                      direction: AxisDirection.left,
+                                      count: leftHidden,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 4,
-                            top: 0,
-                            bottom: 0,
-                            child: Center(
-                              child: GestureDetector(
-                                onTap: showRight
-                                    ? () {
-                                        _scrollByViewport(
-                                          toRight: true,
-                                          viewportWidth: constraints.maxWidth,
-                                        );
-                                      }
-                                    : null,
-                                child: _OverflowHint(
-                                  visible: showRight,
-                                  direction: AxisDirection.right,
-                                  count: rightHidden,
+                              Positioned(
+                                right: 4,
+                                top: 0,
+                                bottom: 0,
+                                child: Center(
+                                  child: GestureDetector(
+                                    onTap: showRight
+                                        ? () {
+                                            _scrollByViewport(
+                                              toRight: true,
+                                              viewportWidth:
+                                                  constraints.maxWidth,
+                                            );
+                                          }
+                                        : null,
+                                    child: _OverflowHint(
+                                      visible: showRight,
+                                      direction: AxisDirection.right,
+                                      count: rightHidden,
+                                    ),
+                                  ),
                                 ),
                               ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextButton.icon(
+                            onPressed: () {
+                              _scrollToCenterForContent(
+                                viewportWidth: constraints.maxWidth,
+                                contentWidth: contentWidth,
+                              );
+                            },
+                            icon: const Icon(Icons.center_focus_strong),
+                            label: const Text('Centralizar'),
+                          ),
+                          const SizedBox(width: 12),
+                          TextButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                _showGridOverlay = !_showGridOverlay;
+                              });
+                            },
+                            icon: Icon(
+                              _showGridOverlay
+                                  ? Icons.grid_off
+                                  : Icons.grid_on,
+                            ),
+                            label: Text(
+                              _showGridOverlay ? 'Ocultar grade' : 'Mostrar grade',
                             ),
                           ),
-                          // Botão "Centro" removido do overlay para não cobrir a grade
                         ],
                       ),
-                    ),
+                    ],
                   );
                 },
               ),
