@@ -1180,6 +1180,8 @@ class _CountScreenState extends State<_CountScreen> {
   final bool _filteredMode = true;
   final Set<int> _pressed = <int>{};
   bool _showGridOverlay = false;
+  bool _alwaysCenterOnOpen = false;
+  bool _initialCenterApplied = false;
 
   void _snapToNearest(double viewportWidth) {
     // Alinha suavemente a rolagem ao múltiplo exato da largura de uma célula
@@ -1218,11 +1220,44 @@ class _CountScreenState extends State<_CountScreen> {
         .then((_) => _snapToNearest(viewportWidth));
   }
 
+  void _centerCurrentBlock(double viewportWidth) {
+    const double seatCellWidth = 96.0;
+    const double crossSpacing = 6.0;
+    final steps = widget.rowGroupSteps.isNotEmpty
+        ? widget.rowGroupSteps.map((v) => v <= 0 ? 1 : v).toList()
+        : <int>[];
+    if (steps.isEmpty) return;
+
+    double startPx = 0.0;
+    for (int i = 0; i < _currentBlock && i < steps.length; i++) {
+      final double blockW = steps[i] * seatCellWidth + crossSpacing * (steps[i] - 1);
+      final double corridorW = (i < steps.length - 1) ? (seatCellWidth + crossSpacing) : 0.0;
+      startPx += blockW + corridorW;
+    }
+    final double currentBlockW = steps[_currentBlock] * seatCellWidth + crossSpacing * (steps[_currentBlock] - 1);
+    double target = startPx + currentBlockW / 2.0 - viewportWidth / 2.0;
+    final double maxExtent = _hCtrl.position.maxScrollExtent;
+    if (target < 0) target = 0;
+    if (target > maxExtent) target = maxExtent;
+    _hCtrl
+        .animateTo(
+          target,
+          duration: const Duration(milliseconds: 240),
+          curve: Curves.easeOut,
+        )
+        .then((_) => _snapToNearest(viewportWidth));
+  }
+
   @override
   void initState() {
     super.initState();
     _hCtrl.addListener(_onScroll);
     _vCtrl.addListener(_onVScroll);
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+        _alwaysCenterOnOpen = prefs.getBool('pref_center_on_open') ?? false;
+      });
+    });
   }
 
   @override
@@ -1831,6 +1866,20 @@ class _CountScreenState extends State<_CountScreen> {
                   final bool showLeft = leftHidden > 0;
                   final bool showRight = rightHidden > 0;
 
+                  if (_alwaysCenterOnOpen && !_initialCenterApplied) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (_filteredMode) {
+                        _centerCurrentBlock(constraints.maxWidth);
+                      } else {
+                        _scrollToCenterForContent(
+                          viewportWidth: constraints.maxWidth,
+                          contentWidth: contentWidth,
+                        );
+                      }
+                      setState(() => _initialCenterApplied = true);
+                    });
+                  }
+
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1964,6 +2013,14 @@ class _CountScreenState extends State<_CountScreen> {
                           const SizedBox(width: 12),
                           TextButton.icon(
                             onPressed: () {
+                              _centerCurrentBlock(constraints.maxWidth);
+                            },
+                            icon: const Icon(Icons.view_week),
+                            label: const Text('Centralizar fileira'),
+                          ),
+                          const SizedBox(width: 12),
+                          TextButton.icon(
+                            onPressed: () {
                               setState(() {
                                 _showGridOverlay = !_showGridOverlay;
                               });
@@ -1976,6 +2033,25 @@ class _CountScreenState extends State<_CountScreen> {
                             label: Text(
                               _showGridOverlay ? 'Ocultar grade' : 'Mostrar grade',
                             ),
+                          ),
+                          const SizedBox(width: 12),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('Sempre centralizar ao abrir'),
+                              const SizedBox(width: 6),
+                              Switch(
+                                value: _alwaysCenterOnOpen,
+                                onChanged: (v) async {
+                                  setState(() {
+                                    _alwaysCenterOnOpen = v;
+                                    _initialCenterApplied = false;
+                                  });
+                                  final prefs = await SharedPreferences.getInstance();
+                                  await prefs.setBool('pref_center_on_open', v);
+                                },
+                              ),
+                            ],
                           ),
                         ],
                       ),
