@@ -161,9 +161,7 @@ ThemeData _buildPurpleLightTheme() {
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: scheme.surfaceContainer,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: scheme.outlineVariant, width: 1.6),
@@ -314,9 +312,7 @@ ThemeData _buildPurpleDarkTheme() {
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: scheme.surfaceContainer,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: scheme.outlineVariant, width: 1.6),
@@ -769,9 +765,8 @@ class _HomeShellState extends State<HomeShell> {
       material.showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const material.Center(
-          child: material.CircularProgressIndicator(),
-        ),
+        builder: (_) =>
+            const material.Center(child: material.CircularProgressIndicator()),
       );
       dialogShown = true;
       await dart_async.Future.delayed(const Duration(milliseconds: 400));
@@ -832,9 +827,9 @@ class _HomeShellState extends State<HomeShell> {
         dialogShown = false;
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao salvar registro: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao salvar registro: $e')));
       }
       debugPrint('Erro ao salvar registro: $e\n$st');
     }
@@ -926,8 +921,8 @@ class _HomeShellState extends State<HomeShell> {
           onAddIndicator: (name) {
             final t = name.trim();
             if (t.isEmpty) return;
-            final cap = t[0].toUpperCase() +
-                (t.length > 1 ? t.substring(1) : '');
+            final cap =
+                t[0].toUpperCase() + (t.length > 1 ? t.substring(1) : '');
             setState(() => indicators.add(cap));
           },
           onRemoveIndicator: (index) {
@@ -955,8 +950,7 @@ class _HomeShellState extends State<HomeShell> {
                   if (newBlockSizes != null && newBlockSizes.isNotEmpty) {
                     blockSizes = List.from(newBlockSizes);
                   }
-                  if (newRowGroupSteps != null &&
-                      newRowGroupSteps.isNotEmpty) {
+                  if (newRowGroupSteps != null && newRowGroupSteps.isNotEmpty) {
                     rowGroupSteps = List.from(
                       newRowGroupSteps.map((v) => v <= 0 ? 1 : v),
                     );
@@ -1220,32 +1214,11 @@ class _CountScreenState extends State<_CountScreen> {
         .then((_) => _snapToNearest(viewportWidth));
   }
 
+  // Desativada a centralização automática ao clicar nas fileiras
   void _centerCurrentBlock(double viewportWidth) {
-    const double seatCellWidth = 96.0;
-    const double crossSpacing = 6.0;
-    final steps = widget.rowGroupSteps.isNotEmpty
-        ? widget.rowGroupSteps.map((v) => v <= 0 ? 1 : v).toList()
-        : <int>[];
-    if (steps.isEmpty) return;
-
-    double startPx = 0.0;
-    for (int i = 0; i < _currentBlock && i < steps.length; i++) {
-      final double blockW = steps[i] * seatCellWidth + crossSpacing * (steps[i] - 1);
-      final double corridorW = (i < steps.length - 1) ? (seatCellWidth + crossSpacing) : 0.0;
-      startPx += blockW + corridorW;
-    }
-    final double currentBlockW = steps[_currentBlock] * seatCellWidth + crossSpacing * (steps[_currentBlock] - 1);
-    double target = startPx + currentBlockW / 2.0 - viewportWidth / 2.0;
-    final double maxExtent = _hCtrl.position.maxScrollExtent;
-    if (target < 0) target = 0;
-    if (target > maxExtent) target = maxExtent;
-    _hCtrl
-        .animateTo(
-          target,
-          duration: const Duration(milliseconds: 240),
-          curve: Curves.easeOut,
-        )
-        .then((_) => _snapToNearest(viewportWidth));
+    // Agora, apenas mantém posição atual — não faz rolagem automática
+    // Isso evita que a grade “pule” para o centro sozinha.
+    debugPrint('Centralização automática desativada (controle manual ativo)');
   }
 
   @override
@@ -1306,25 +1279,10 @@ class _CountScreenState extends State<_CountScreen> {
     }
   }
 
+  // ✅ Desativada rolagem automática entre blocos — mantém posição atual
   void _scrollToBlock(int index) {
-    const double seatCellWidth = 96.0;
-    const double crossSpacing = 6.0;
-    final steps = widget.rowGroupSteps.isNotEmpty
-        ? widget.rowGroupSteps.map((v) => v <= 0 ? 1 : v).toList()
-        : <int>[];
-    double offset = 0.0;
-    for (int i = 0; i < index && i < steps.length; i++) {
-      final blockW = steps[i] * seatCellWidth + crossSpacing * (steps[i] - 1);
-      final corridorW = (i < steps.length - 1)
-          ? (seatCellWidth + crossSpacing)
-          : 0.0;
-      offset += blockW + corridorW;
-    }
-    _hCtrl.animateTo(
-      offset,
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOut,
-    );
+    debugPrint('Rolagem automática para bloco desativada (modo livre)');
+    // não faz nada — assim o usuário tem liberdade total
   }
 
   // Rola um "passo" de viewport para cada toque na seta,
@@ -1364,16 +1322,8 @@ class _CountScreenState extends State<_CountScreen> {
   @override
   void didUpdateWidget(covariant _CountScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Quando muda organização/grade, garantir primeira coluna visível
-    if (!_filteredMode) {
-      // Em modo não filtrado, rola para início do bloco atual
-      _scrollToBlock(_currentBlock);
-    } else {
-      // Em modo filtrado, zera rolagem para mostrar coluna inicial
-      if (_hCtrl.hasClients) {
-        _hCtrl.jumpTo(0.0);
-      }
-    }
+    // Nenhuma centralização automática após atualizar o widget
+    debugPrint('didUpdateWidget: centralização automática desativada.');
   }
 
   @override
@@ -1416,718 +1366,727 @@ class _CountScreenState extends State<_CountScreen> {
                 MediaQuery.of(context).padding.bottom + 92,
               ),
               child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    'Ocupados: ${widget.occupied}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    'Em pé: ${widget.standing}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                  Builder(
-                    builder: (context) {
-                      final theme = Theme.of(context);
-                      final Color badgeBase = widget.useTertiaryTotalBadge
-                          ? theme.colorScheme.tertiary
-                          : theme.colorScheme.primary;
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Ocupados: ${widget.occupied}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
                         ),
-                        decoration: BoxDecoration(
-                          color: badgeBase.withValues(
-                            alpha: theme.brightness == Brightness.dark
-                                ? 0.25
-                                : 0.18,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: badgeBase.withValues(alpha: 0.55),
-                              blurRadius: 12,
-                              spreadRadius: 1,
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        'Em pé: ${widget.standing}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      Builder(
+                        builder: (context) {
+                          final theme = Theme.of(context);
+                          final Color badgeBase = widget.useTertiaryTotalBadge
+                              ? theme.colorScheme.tertiary
+                              : theme.colorScheme.primary;
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
                             ),
-                          ],
-                        ),
-                        child: Text(
-                          'Total: ${widget.total}',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: badgeBase,
-                            shadows: [
-                              Shadow(
-                                color: badgeBase.withValues(alpha: 0.8),
-                                blurRadius: 8,
+                            decoration: BoxDecoration(
+                              color: badgeBase.withValues(
+                                alpha: theme.brightness == Brightness.dark
+                                    ? 0.25
+                                    : 0.18,
                               ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: badgeBase.withValues(alpha: 0.55),
+                                  blurRadius: 12,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              'Total: ${widget.total}',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: badgeBase,
+                                shadows: [
+                                  Shadow(
+                                    color: badgeBase.withValues(alpha: 0.8),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        tooltip: 'Fileira anterior',
+                        onPressed: () {
+                          if (_currentBlock > 0) {
+                            setState(() => _currentBlock--);
+                            widget.onCurrentBlockChanged(_currentBlock);
+                          }
+                        },
+                        icon: const Icon(Icons.chevron_left),
+                      ),
+                      Text(
+                        'Fileira ${_currentBlock + 1}/${widget.rowGroupSteps.length}',
+                      ),
+                      IconButton(
+                        tooltip: 'Próxima fileira',
+                        onPressed: () {
+                          final totalBlocks = widget.rowGroupSteps.length;
+                          if (_currentBlock < totalBlocks - 1) {
+                            setState(() => _currentBlock++);
+                            widget.onCurrentBlockChanged(_currentBlock);
+                          }
+                        },
+                        icon: const Icon(Icons.chevron_right),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  _IndicatorInput(
+                    onAdd: widget.onAddIndicator,
+                    indicators: widget.indicators,
+                    onRemove: widget.onRemoveIndicator,
+                  ),
+                  const SizedBox(height: 4),
+                  DropdownButtonFormField<String>(
+                    initialValue: widget.meetingType,
+                    decoration: const InputDecoration(
+                      labelText: 'Tipo da reunião',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                    ),
+                    items: [
+                      for (final t in kMeetingTypes)
+                        DropdownMenuItem(value: t, child: Text(t)),
+                    ],
+                    onChanged: widget.onMeetingChanged,
+                  ),
+                  const SizedBox(height: 2),
+                  if (widget.rowGroupSteps.isNotEmpty)
+                    SizedBox(
+                      height: 40,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Center(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              for (
+                                int i = 0;
+                                i < widget.rowGroupSteps.length;
+                                i++
+                              ) ...[
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() => _currentBlock = i);
+                                    if (!_filteredMode) {
+                                      _scrollToBlock(i);
+                                    }
+                                    widget.onCurrentBlockChanged(_currentBlock);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: (i == _currentBlock)
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.primary
+                                          : (Theme.of(context).brightness ==
+                                                    Brightness.dark
+                                                ? const Color(0xFF3A3A3A)
+                                                : Colors.black12),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      'Fileira ${i + 1}',
+                                      style: TextStyle(
+                                        color: (i == _currentBlock)
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimary
+                                            : null,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                if (i < widget.rowGroupSteps.length - 1)
+                                  const SizedBox(width: 8),
+                              ],
                             ],
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    tooltip: 'Fileira anterior',
-                    onPressed: () {
-                      if (_currentBlock > 0) {
-                        setState(() => _currentBlock--);
-                        widget.onCurrentBlockChanged(_currentBlock);
-                      }
-                    },
-                    icon: const Icon(Icons.chevron_left),
-                  ),
-                  Text(
-                    'Fileira ${_currentBlock + 1}/${widget.rowGroupSteps.length}',
-                  ),
-                  IconButton(
-                    tooltip: 'Próxima fileira',
-                    onPressed: () {
-                      final totalBlocks = widget.rowGroupSteps.length;
-                      if (_currentBlock < totalBlocks - 1) {
-                        setState(() => _currentBlock++);
-                        widget.onCurrentBlockChanged(_currentBlock);
-                      }
-                    },
-                    icon: const Icon(Icons.chevron_right),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              _IndicatorInput(
-                onAdd: widget.onAddIndicator,
-                indicators: widget.indicators,
-                onRemove: widget.onRemoveIndicator,
-              ),
-              const SizedBox(height: 4),
-              DropdownButtonFormField<String>(
-                initialValue: widget.meetingType,
-                decoration: const InputDecoration(
-                  labelText: 'Tipo da reunião',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                ),
-                items: [
-                  for (final t in kMeetingTypes)
-                    DropdownMenuItem(value: t, child: Text(t)),
-                ],
-                onChanged: widget.onMeetingChanged,
-              ),
-              const SizedBox(height: 2),
-              if (widget.rowGroupSteps.isNotEmpty)
-                SizedBox(
-                  height: 40,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          for (
-                            int i = 0;
-                            i < widget.rowGroupSteps.length;
-                            i++
-                          ) ...[
-                            GestureDetector(
-                              onTap: () {
-                                setState(() => _currentBlock = i);
-                                if (!_filteredMode) {
-                                  _scrollToBlock(i);
-                                }
-                                widget.onCurrentBlockChanged(_currentBlock);
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: (i == _currentBlock)
-                                      ? Theme.of(context).colorScheme.primary
-                                      : (Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? const Color(0xFF3A3A3A)
-                                            : Colors.black12),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  'Fileira ${i + 1}',
-                                  style: TextStyle(
-                                    color: (i == _currentBlock)
-                                        ? Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimary
-                                        : null,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                      ),
+                    ),
+                  // Depuração: mostra a configuração atual aplicada
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      // 3D panel look: subtle gradient + shadow + fine border
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                          Theme.of(context).colorScheme.surface,
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(
+                            context,
+                          ).shadowColor.withValues(alpha: 0.25),
+                          blurRadius: 14,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              const TextSpan(text: 'Poltronas por fileira: '),
+                              TextSpan(
+                                text: widget.blockSizes.isNotEmpty
+                                    ? widget.blockSizes.join(',')
+                                    : '-',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
-                            ),
-                            if (i < widget.rowGroupSteps.length - 1)
-                              const SizedBox(width: 8),
-                          ],
-                        ],
-                      ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 6),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              const TextSpan(text: 'Organizador por fileira: '),
+                              TextSpan(
+                                text: widget.rowGroupSteps.isNotEmpty
+                                    ? widget.rowGroupSteps.join(',')
+                                    : '-',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 6),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text:
+                                    'Preenchidos na fileira ${_currentBlock + 1}: ',
+                              ),
+                              TextSpan(
+                                text:
+                                    (occupiedByBlock.isNotEmpty &&
+                                        _currentBlock >= 0 &&
+                                        _currentBlock < occupiedByBlock.length)
+                                    ? occupiedByBlock[_currentBlock].toString()
+                                    : '-',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              // Depuração: mostra a configuração atual aplicada
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  // 3D panel look: subtle gradient + shadow + fine border
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
-                      Theme.of(context).colorScheme.surface,
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context)
-                          .shadowColor
-                          .withValues(alpha: 0.25),
-                      blurRadius: 14,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                    width: 1.2,
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          const TextSpan(text: 'Poltronas por fileira: '),
-                          TextSpan(
-                            text: widget.blockSizes.isNotEmpty
-                                ? widget.blockSizes.join(',')
-                                : '-',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color:
-                                  Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 6),
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          const TextSpan(text: 'Organizador por fileira: '),
-                          TextSpan(
-                            text: widget.rowGroupSteps.isNotEmpty
-                                ? widget.rowGroupSteps.join(',')
-                                : '-',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color:
-                                  Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 6),
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text:
-                                'Preenchidos na fileira ${_currentBlock + 1}: ',
-                          ),
-                          TextSpan(
-                            text: (occupiedByBlock.isNotEmpty &&
-                                    _currentBlock >= 0 &&
-                                    _currentBlock < occupiedByBlock.length)
-                                ? occupiedByBlock[_currentBlock].toString()
-                                : '-',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color:
-                                  Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 2),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  // No Web, limitamos a largura do grid para evitar células exageradamente grandes.
-                  // Largura alvo por célula (coluna) mais espaçamento entre colunas.
-                  // Espaçamentos maiores para ficar semelhante ao desenho (arejado).
-                  // Espaçamento lateral um pouco menor para as linhas dos corredores ficarem mais contínuas visualmente.
-                  // Aproximar colunas, mas com espaçamento suficiente para toque confortável
-                  const crossSpacing = 6.0;
-                  // Define colunas visíveis (fileira filtrada ou todas)
-                  final int contentColumns = _filteredMode
-                      ? visibleBlockWidth
-                      : columns;
+                  const SizedBox(height: 2),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      // No Web, limitamos a largura do grid para evitar células exageradamente grandes.
+                      // Largura alvo por célula (coluna) mais espaçamento entre colunas.
+                      // Espaçamentos maiores para ficar semelhante ao desenho (arejado).
+                      // Espaçamento lateral um pouco menor para as linhas dos corredores ficarem mais contínuas visualmente.
+                      // Aproximar colunas, mas com espaçamento suficiente para toque confortável
+                      const crossSpacing = 6.0;
+                      // Define colunas visíveis (fileira filtrada ou todas)
+                      final int contentColumns = _filteredMode
+                          ? visibleBlockWidth
+                          : columns;
 
-                  // Mantém largura fixa da célula para não diminuir ao aumentar colunas.
-                  const double seatCellWidth = 96.0;
-                  final double targetCellHeight =
-                      seatCellWidth; // ícone centralizado
-                  final double childAspectRatio =
-                      seatCellWidth / targetCellHeight;
+                      // Mantém largura fixa da célula para não diminuir ao aumentar colunas.
+                      const double seatCellWidth = 96.0;
+                      final double targetCellHeight =
+                          seatCellWidth; // ícone centralizado
+                      final double childAspectRatio =
+                          seatCellWidth / targetCellHeight;
 
-                  // Tamanho do ícone proporcional à célula
-                  final double seatIconSize = (seatCellWidth * 0.52).clamp(
-                    24.0,
-                    52.0,
-                  );
+                      // Tamanho do ícone proporcional à célula
+                      final double seatIconSize = (seatCellWidth * 0.52).clamp(
+                        24.0,
+                        52.0,
+                      );
 
-                  // Largura total do conteúdo do grid para permitir rolagem horizontal
-                  final double contentWidth = contentColumns == 0
-                      ? seatCellWidth
-                      : (contentColumns * seatCellWidth +
-                            crossSpacing * (contentColumns - 1));
+                      // Largura total do conteúdo do grid para permitir rolagem horizontal
+                      final double contentWidth = contentColumns == 0
+                          ? seatCellWidth
+                          : (contentColumns * seatCellWidth +
+                                crossSpacing * (contentColumns - 1));
 
-                  // Calcula linhas efetivas com algum assento visível no bloco atual
-                  final List<int> visibleRowIndices =
-                      List<int>.generate(rows, (i) => i).where((i) {
-                        for (
-                          int localC = 0;
-                          localC < contentColumns;
-                          localC++
-                        ) {
+                      // Calcula linhas efetivas com algum assento visível no bloco atual
+                      final List<int> visibleRowIndices =
+                          List<int>.generate(rows, (i) => i).where((i) {
+                            for (
+                              int localC = 0;
+                              localC < contentColumns;
+                              localC++
+                            ) {
+                              final c = _filteredMode
+                                  ? (blockStart + localC)
+                                  : localC;
+                              final cell = widget.grid[i][c];
+                              if (cell != null) return true;
+                            }
+                            return false;
+                          }).toList();
+                      final int effectiveRows = visibleRowIndices.length;
+
+                      final grid = GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: contentColumns,
+                          mainAxisSpacing: 6,
+                          crossAxisSpacing: crossSpacing,
+                          childAspectRatio: childAspectRatio,
+                        ),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: effectiveRows * contentColumns,
+                        itemBuilder: (context, index) {
+                          final r = visibleRowIndices[index ~/ contentColumns];
+                          final localC = index % contentColumns;
                           final c = _filteredMode
                               ? (blockStart + localC)
                               : localC;
-                          final cell = widget.grid[i][c];
-                          if (cell != null) return true;
-                        }
-                        return false;
-                      }).toList();
-                  final int effectiveRows = visibleRowIndices.length;
-
-                  final grid = GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: contentColumns,
-                      mainAxisSpacing: 6,
-                      crossAxisSpacing: crossSpacing,
-                      childAspectRatio: childAspectRatio,
-                    ),
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: effectiveRows * contentColumns,
-                    itemBuilder: (context, index) {
-                      final r = visibleRowIndices[index ~/ contentColumns];
-                      final localC = index % contentColumns;
-                      final c = _filteredMode ? (blockStart + localC) : localC;
-                      final cell = widget.grid[r][c];
-                      if (cell == null) {
-                        // Células nulas representam ausência de cadeira (vazio) ou corredor.
-                        // Em modo filtrado, corredores externos não são exibidos; apenas vazio.
-                        return const SizedBox.shrink();
-                      }
-                      final occupied = cell;
-                      final int seatKey = index;
-                      return InkWell(
-                        borderRadius: BorderRadius.circular(6),
-                        onTapDown: (_) => setState(() {
-                          _pressed.add(seatKey);
-                        }),
-                        onTapCancel: () => setState(() {
-                          _pressed.remove(seatKey);
-                        }),
-                        onTap: () {
-                          widget.onSeatTap(r, c);
-                          setState(() {
-                            _pressed.remove(seatKey);
-                          });
-                        },
-                        child: Center(
-                          child: Transform.scale(
-                            scale: _pressed.contains(seatKey) ? 0.92 : 1.0,
-                            child: FractionallySizedBox(
-                              widthFactor: 0.95,
-                              heightFactor: 0.95,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: occupied
-                                        ? [
-                                            Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                                .withValues(alpha: 0.85),
-                                            Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                          ]
-                                        : [
-                                            Theme.of(context)
-                                                .colorScheme
-                                                .surfaceContainerHighest,
-                                            Theme.of(
-                                              context,
-                                            ).colorScheme.secondaryContainer,
-                                          ],
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha:
+                          final cell = widget.grid[r][c];
+                          if (cell == null) {
+                            // Células nulas representam ausência de cadeira (vazio) ou corredor.
+                            // Em modo filtrado, corredores externos não são exibidos; apenas vazio.
+                            return const SizedBox.shrink();
+                          }
+                          final occupied = cell;
+                          final int seatKey = index;
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(6),
+                            onTapDown: (_) => setState(() {
+                              _pressed.add(seatKey);
+                            }),
+                            onTapCancel: () => setState(() {
+                              _pressed.remove(seatKey);
+                            }),
+                            onTap: () {
+                              widget.onSeatTap(r, c);
+                              setState(() {
+                                _pressed.remove(seatKey);
+                              });
+                            },
+                            child: Center(
+                              child: Transform.scale(
+                                scale: _pressed.contains(seatKey) ? 0.92 : 1.0,
+                                child: FractionallySizedBox(
+                                  widthFactor: 0.95,
+                                  heightFactor: 0.95,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: occupied
+                                            ? [
+                                                Theme.of(context)
+                                                    .colorScheme
+                                                    .primary
+                                                    .withValues(alpha: 0.85),
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                              ]
+                                            : [
+                                                Theme.of(context)
+                                                    .colorScheme
+                                                    .surfaceContainerHighest,
+                                                Theme.of(context)
+                                                    .colorScheme
+                                                    .secondaryContainer,
+                                              ],
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha:
+                                                Theme.of(context).brightness ==
+                                                    Brightness.dark
+                                                ? 0.35
+                                                : 0.15,
+                                          ),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outlineVariant
+                                            .withValues(alpha: 0.30),
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Icon(
+                                        occupied
+                                            ? Icons.person
+                                            : Icons.event_seat,
+                                        size: seatIconSize,
+                                        color:
                                             Theme.of(context).brightness ==
                                                 Brightness.dark
-                                            ? 0.35
-                                            : 0.15,
+                                            ? Colors.white
+                                            : Colors.black87,
                                       ),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 3),
                                     ),
-                                  ],
-                                  border: Border.all(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .outlineVariant
-                                        .withValues(alpha: 0.30),
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    occupied ? Icons.person : Icons.event_seat,
-                                    size: seatIconSize,
-                                    color:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.white
-                                        : Colors.black87,
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       );
-                    },
-                  );
 
-                  // Cálculo de overflow e quantidades ocultas à esquerda/direita
-                  final double perColW = seatCellWidth + crossSpacing;
-                  final int viewportCols = (constraints.maxWidth / perColW)
-                      .floor()
-                      .clamp(0, contentColumns);
-                  final double offset = _hCtrl.hasClients ? _hCtrl.offset : 0.0;
-                  final int leftHidden = (offset / perColW).floor().clamp(
-                    0,
-                    contentColumns,
-                  );
-                  final int rightHidden =
-                      (contentColumns - leftHidden - viewportCols).clamp(
+                      // Cálculo de overflow e quantidades ocultas à esquerda/direita
+                      final double perColW = seatCellWidth + crossSpacing;
+                      final int viewportCols = (constraints.maxWidth / perColW)
+                          .floor()
+                          .clamp(0, contentColumns);
+                      final double offset = _hCtrl.hasClients
+                          ? _hCtrl.offset
+                          : 0.0;
+                      final int leftHidden = (offset / perColW).floor().clamp(
                         0,
                         contentColumns,
                       );
-                  final bool showLeft = leftHidden > 0;
-                  final bool showRight = rightHidden > 0;
+                      final int rightHidden =
+                          (contentColumns - leftHidden - viewportCols).clamp(
+                            0,
+                            contentColumns,
+                          );
+                      final bool showLeft = leftHidden > 0;
+                      final bool showRight = rightHidden > 0;
 
-                  if (_alwaysCenterOnOpen && !_initialCenterApplied) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (_filteredMode) {
-                        _centerCurrentBlock(constraints.maxWidth);
-                      } else {
-                        _scrollToCenterForContent(
-                          viewportWidth: constraints.maxWidth,
-                          contentWidth: contentWidth,
+                      // ✅ Centralização inicial desativada — liberdade total ao abrir
+                      if (_alwaysCenterOnOpen && !_initialCenterApplied) {
+                        debugPrint(
+                          'Centralização inicial desativada — livre para navegar.',
                         );
+                        setState(() => _initialCenterApplied = true);
                       }
-                      setState(() => _initialCenterApplied = true);
-                    });
-                  }
 
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Align(
-                        alignment: Alignment.topCenter,
-                        child: NotificationListener<ScrollNotification>(
-                          onNotification: (n) {
-                            if (n is ScrollEndNotification) {
-                              _snapToNearest(constraints.maxWidth);
-                            }
-                            setState(() {});
-                            return false;
-                          },
-                          child: Stack(
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Align(
                             alignment: Alignment.topCenter,
-                            children: [
-                              ScrollConfiguration(
-                                behavior: _NoGlowBehavior(),
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  controller: _hCtrl,
-                                  physics: const ClampingScrollPhysics(),
-                                  dragStartBehavior: DragStartBehavior.down,
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      minWidth: constraints.maxWidth,
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 44.0,
-                                      ),
-                                      child: Center(
-                                        child: SizedBox(
-                                          width: contentWidth,
-                                          child: Material(
-                                            elevation: 12,
-                                            shadowColor:
-                                                Theme.of(context).shadowColor,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
+                            child: NotificationListener<ScrollNotification>(
+                              onNotification: (n) {
+                                if (n is ScrollEndNotification) {
+                                  _snapToNearest(constraints.maxWidth);
+                                }
+                                setState(() {});
+                                return false;
+                              },
+                              child: Stack(
+                                alignment: Alignment.topCenter,
+                                children: [
+                                  ScrollConfiguration(
+                                    behavior: _NoGlowBehavior(),
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      controller: _hCtrl,
+                                      physics: const ClampingScrollPhysics(),
+                                      dragStartBehavior: DragStartBehavior.down,
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          minWidth: constraints.maxWidth,
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 44.0,
+                                          ),
+                                          child: Center(
+                                            child: SizedBox(
+                                              width: contentWidth,
+                                              child: Material(
+                                                elevation: 12,
+                                                shadowColor: Theme.of(
+                                                  context,
+                                                ).shadowColor,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                clipBehavior: Clip.antiAlias,
+                                                child: grid,
+                                              ),
                                             ),
-                                            clipBehavior: Clip.antiAlias,
-                                            child: grid,
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              if (_showGridOverlay)
-                                Positioned.fill(
-                                  child: IgnorePointer(
-                                    child: GridPaper(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .outlineVariant
-                                          .withValues(alpha: 0.18),
-                                      interval: seatCellWidth + crossSpacing,
-                                      divisions: 1,
-                                      subdivisions: 4,
+                                  if (_showGridOverlay)
+                                    Positioned.fill(
+                                      child: IgnorePointer(
+                                        child: GridPaper(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outlineVariant
+                                              .withValues(alpha: 0.18),
+                                          interval:
+                                              seatCellWidth + crossSpacing,
+                                          divisions: 1,
+                                          subdivisions: 4,
+                                        ),
+                                      ),
+                                    ),
+                                  Positioned(
+                                    left: 4,
+                                    top: 0,
+                                    bottom: 0,
+                                    child: Center(
+                                      child: GestureDetector(
+                                        onTap: showLeft
+                                            ? () {
+                                                _scrollByViewport(
+                                                  toRight: false,
+                                                  viewportWidth:
+                                                      constraints.maxWidth,
+                                                );
+                                              }
+                                            : null,
+                                        child: _OverflowHint(
+                                          visible: showLeft,
+                                          direction: AxisDirection.left,
+                                          count: leftHidden,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              Positioned(
-                                left: 4,
-                                top: 0,
-                                bottom: 0,
-                                child: Center(
-                                  child: GestureDetector(
-                                    onTap: showLeft
-                                        ? () {
-                                            _scrollByViewport(
-                                              toRight: false,
-                                              viewportWidth:
-                                                  constraints.maxWidth,
-                                            );
-                                          }
-                                        : null,
-                                    child: _OverflowHint(
-                                      visible: showLeft,
-                                      direction: AxisDirection.left,
-                                      count: leftHidden,
+                                  Positioned(
+                                    right: 4,
+                                    top: 0,
+                                    bottom: 0,
+                                    child: Center(
+                                      child: GestureDetector(
+                                        onTap: showRight
+                                            ? () {
+                                                _scrollByViewport(
+                                                  toRight: true,
+                                                  viewportWidth:
+                                                      constraints.maxWidth,
+                                                );
+                                              }
+                                            : null,
+                                        child: _OverflowHint(
+                                          visible: showRight,
+                                          direction: AxisDirection.right,
+                                          count: rightHidden,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
-                              Positioned(
-                                right: 4,
-                                top: 0,
-                                bottom: 0,
-                                child: Center(
-                                  child: GestureDetector(
-                                    onTap: showRight
-                                        ? () {
-                                            _scrollByViewport(
-                                              toRight: true,
-                                              viewportWidth:
-                                                  constraints.maxWidth,
-                                            );
-                                          }
-                                        : null,
-                                    child: _OverflowHint(
-                                      visible: showRight,
-                                      direction: AxisDirection.right,
-                                      count: rightHidden,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextButton.icon(
-                            onPressed: () {
-                              _scrollToCenterForContent(
-                                viewportWidth: constraints.maxWidth,
-                                contentWidth: contentWidth,
-                              );
-                            },
-                            icon: const Icon(Icons.center_focus_strong),
-                            label: const Text('Centralizar'),
-                          ),
-                          const SizedBox(width: 12),
-                          TextButton.icon(
-                            onPressed: () {
-                              _centerCurrentBlock(constraints.maxWidth);
-                            },
-                            icon: const Icon(Icons.view_week),
-                            label: const Text('Centralizar fileira'),
-                          ),
-                          const SizedBox(width: 12),
-                          TextButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                _showGridOverlay = !_showGridOverlay;
-                              });
-                            },
-                            icon: Icon(
-                              _showGridOverlay
-                                  ? Icons.grid_off
-                                  : Icons.grid_on,
-                            ),
-                            label: Text(
-                              _showGridOverlay ? 'Ocultar grade' : 'Mostrar grade',
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text('Sempre centralizar ao abrir'),
-                              const SizedBox(width: 6),
-                              Switch(
-                                value: _alwaysCenterOnOpen,
-                                onChanged: (v) async {
-                                  setState(() {
-                                    _alwaysCenterOnOpen = v;
-                                    _initialCenterApplied = false;
-                                  });
-                                  final prefs = await SharedPreferences.getInstance();
-                                  await prefs.setBool('pref_center_on_open', v);
-                                },
-                              ),
-                            ],
+                          const SizedBox(height: 8),
+                          // 🔧 Corrigido para evitar overflow horizontal
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextButton.icon(
+                                  onPressed: () {
+                                    _scrollToCenterForContent(
+                                      viewportWidth: constraints.maxWidth,
+                                      contentWidth: contentWidth,
+                                    );
+                                  },
+                                  icon: const Icon(Icons.center_focus_strong),
+                                  label: const Text('Centralizar'),
+                                ),
+                                const SizedBox(width: 12),
+                                TextButton.icon(
+                                  onPressed: () {
+                                    _centerCurrentBlock(constraints.maxWidth);
+                                  },
+                                  icon: const Icon(Icons.view_week),
+                                  label: const Text('Centralizar fileira'),
+                                ),
+                                const SizedBox(width: 12),
+                                TextButton.icon(
+                                  onPressed: () {
+                                    setState(() {
+                                      _showGridOverlay = !_showGridOverlay;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _showGridOverlay
+                                        ? Icons.grid_off
+                                        : Icons.grid_on,
+                                  ),
+                                  label: Text(
+                                    _showGridOverlay
+                                        ? 'Ocultar grade'
+                                        : 'Mostrar grade',
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text('Sempre centralizar ao abrir'),
+                                    const SizedBox(width: 6),
+                                    Switch(
+                                      value: _alwaysCenterOnOpen,
+                                      onChanged: (v) async {
+                                        setState(() {
+                                          _alwaysCenterOnOpen = v;
+                                          _initialCenterApplied = false;
+                                        });
+                                        final prefs =
+                                            await SharedPreferences.getInstance();
+                                        await prefs.setBool(
+                                          'pref_center_on_open',
+                                          v,
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ],
-                      ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 4),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('Em pé:'),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: widget.onDecStanding,
-                      icon: const Icon(Icons.person_remove_alt_1),
-                    ),
-                    Text('${widget.standing}'),
-                    IconButton(
-                      onPressed: widget.onIncStanding,
-                      icon: const Icon(Icons.person_add_alt_1),
-                    ),
-                    const SizedBox(width: 8),
-                    if (_showBackToTop)
-                      TextButton.icon(
-                        onPressed: _scrollToTop,
-                        icon: const Icon(Icons.arrow_upward),
-                        label: const Text('Início'),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 2),
-              // Botões dinâmicos da Contagem (Salvar acima; Preencher/Despreencher abaixo)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: () => widget.onSave(),
-                      icon: const Icon(Icons.save),
-                      label: const Text('Salvar'),
-                    ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 4),
-                  Row(
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Em pé:'),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: widget.onDecStanding,
+                          icon: const Icon(Icons.person_remove_alt_1),
+                        ),
+                        Text('${widget.standing}'),
+                        IconButton(
+                          onPressed: widget.onIncStanding,
+                          icon: const Icon(Icons.person_add_alt_1),
+                        ),
+                        const SizedBox(width: 8),
+                        if (_showBackToTop)
+                          TextButton.icon(
+                            onPressed: _scrollToTop,
+                            icon: const Icon(Icons.arrow_upward),
+                            label: const Text('Início'),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  // Botões dinâmicos da Contagem (Salvar acima; Preencher/Despreencher abaixo)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () =>
-                              widget.onFillCurrentBlock(_currentBlock),
-                          icon: const Icon(Icons.playlist_add_check),
-                          label: const Text('Preencher fileira atual'),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () => widget.onSave(),
+                          icon: const Icon(Icons.save),
+                          label: const Text('Salvar'),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () =>
-                              widget.onClearCurrentBlock(_currentBlock),
-                          icon: const Icon(Icons.playlist_remove),
-                          label: const Text('Despreencher fileira atual'),
-                        ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () =>
+                                  widget.onFillCurrentBlock(_currentBlock),
+                              icon: const Icon(Icons.playlist_add_check),
+                              label: const Text('Preencher fileira atual'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () =>
+                                  widget.onClearCurrentBlock(_currentBlock),
+                              icon: const Icon(Icons.playlist_remove),
+                              label: const Text('Despreencher fileira atual'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-        ), // fecha GestureDetector antes dos próximos filhos do Stack
+            ),
+          ), // fecha GestureDetector antes dos próximos filhos do Stack
           // Barra flutuante fixa na viewport com navegação horizontal
           Positioned(
             left: 0,
@@ -2137,13 +2096,14 @@ class _CountScreenState extends State<_CountScreen> {
               minimum: const EdgeInsets.only(bottom: 8),
               child: Center(
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surface
-                        .withValues(alpha: 0.98),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surface.withValues(alpha: 0.98),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -2159,10 +2119,11 @@ class _CountScreenState extends State<_CountScreen> {
                       TextButton.icon(
                         onPressed: _hCtrl.hasClients
                             ? () => _scrollByViewport(
-                                  toRight: false,
-                                  viewportWidth:
-                                      MediaQuery.of(context).size.width,
-                                )
+                                toRight: false,
+                                viewportWidth: MediaQuery.of(
+                                  context,
+                                ).size.width,
+                              )
                             : null,
                         icon: const Icon(Icons.chevron_left),
                         label: const Text('Esquerda'),
@@ -2179,10 +2140,11 @@ class _CountScreenState extends State<_CountScreen> {
                       TextButton.icon(
                         onPressed: _hCtrl.hasClients
                             ? () => _scrollByViewport(
-                                  toRight: true,
-                                  viewportWidth:
-                                      MediaQuery.of(context).size.width,
-                                )
+                                toRight: true,
+                                viewportWidth: MediaQuery.of(
+                                  context,
+                                ).size.width,
+                              )
                             : null,
                         icon: const Icon(Icons.chevron_right),
                         label: const Text('Direita'),
@@ -2645,228 +2607,357 @@ class _AuditoriumsScreenState extends State<_AuditoriumsScreen> {
         SafeArea(
           child: Form(
             child: SingleChildScrollView(
-              keyboardDismissBehavior:
-                  ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Configuração do Auditório',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Configuração do Auditório',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  // (Removido) Lista de layouts salvos — substituído por ação única de salvar organização
+                  const SizedBox(height: 12),
+                  // Preferências movidas para o final da tela
+                  const SizedBox(height: 0),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.onToggleTheme != null)
+                        IconButton(
+                          onPressed: widget.onToggleTheme,
+                          icon: const Icon(Icons.brightness_6),
+                        ),
+                      const SizedBox(width: 12),
+                      // Controles para adicionar/remover fileiras (valores)
+                      IconButton(
+                        tooltip: 'Adicionar fileira',
+                        onPressed: () async {
+                          await _runWithOverlay('Alterando fileiras', () {
+                            setState(() {
+                              _blockCtrls.add(TextEditingController(text: '1'));
+                              _rowGroupSteps.add(1);
+                              final newSizes = _blockCtrls
+                                  .map((c) => int.tryParse(c.text) ?? 0)
+                                  .map((v) => v < 0 ? 0 : v)
+                                  .toList();
+                              final newRowSteps = List<int>.generate(
+                                newSizes.length,
+                                (i) => i < _rowGroupSteps.length
+                                    ? (_rowGroupSteps[i] <= 0
+                                          ? 1
+                                          : _rowGroupSteps[i])
+                                    : 1,
+                              );
+                              final newFills = List<int>.filled(
+                                newSizes.length,
+                                0,
+                              );
+                              widget.onApply(
+                                newBlockSizes: newSizes,
+                                newRowGroupSteps: newRowSteps,
+                                newFillTotals: newFills,
+                                goToCount: false,
+                              );
+                            });
+                          }, icon: Icons.view_column);
+                        },
+                        icon: const Icon(Icons.add),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    // (Removido) Lista de layouts salvos — substituído por ação única de salvar organização
-                    const SizedBox(height: 12),
-                    // Preferências movidas para o final da tela
-                    const SizedBox(height: 0),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (widget.onToggleTheme != null)
-                          IconButton(
-                            onPressed: widget.onToggleTheme,
-                            icon: const Icon(Icons.brightness_6),
-                          ),
-                        const SizedBox(width: 12),
-                        // Controles para adicionar/remover fileiras (valores)
-                        IconButton(
-                          tooltip: 'Adicionar fileira',
-                          onPressed: () async {
-                            await _runWithOverlay('Alterando fileiras', () {
-                              setState(() {
-                                _blockCtrls.add(
-                                  TextEditingController(text: '1'),
-                                );
-                                _rowGroupSteps.add(1);
-                                final newSizes = _blockCtrls
-                                    .map((c) => int.tryParse(c.text) ?? 0)
-                                    .map((v) => v < 0 ? 0 : v)
-                                    .toList();
-                                final newRowSteps = List<int>.generate(
-                                  newSizes.length,
-                                  (i) => i < _rowGroupSteps.length
-                                      ? (_rowGroupSteps[i] <= 0
-                                            ? 1
-                                            : _rowGroupSteps[i])
-                                      : 1,
-                                );
-                                final newFills = List<int>.filled(
-                                  newSizes.length,
-                                  0,
-                                );
-                                widget.onApply(
-                                  newBlockSizes: newSizes,
-                                  newRowGroupSteps: newRowSteps,
-                                  newFillTotals: newFills,
-                                  goToCount: false,
-                                );
-                              });
-                            }, icon: Icons.view_column);
-                          },
-                          icon: const Icon(Icons.add),
-                        ),
-                        IconButton(
-                          tooltip: 'Remover última fileira',
-                          onPressed: _blockCtrls.length > 1
-                              ? () async {
-                                  await _runWithOverlay(
-                                    'Alterando fileiras',
-                                    () {
-                                      setState(() {
-                                        _blockCtrls.removeLast().dispose();
-                                        if (_rowGroupSteps.isNotEmpty) {
-                                          _rowGroupSteps.removeLast();
-                                        }
-                                        final newSizes = _blockCtrls
-                                            .map(
-                                              (c) => int.tryParse(c.text) ?? 0,
-                                            )
-                                            .map((v) => v < 0 ? 0 : v)
-                                            .toList();
-                                        final newRowSteps = List<int>.generate(
-                                          newSizes.length,
-                                          (i) => i < _rowGroupSteps.length
-                                              ? (_rowGroupSteps[i] <= 0
-                                                    ? 1
-                                                    : _rowGroupSteps[i])
-                                              : 1,
-                                        );
-                                        final newFills = List<int>.filled(
-                                          newSizes.length,
-                                          0,
-                                        );
-                                        widget.onApply(
-                                          newBlockSizes: newSizes,
-                                          newRowGroupSteps: newRowSteps,
-                                          newFillTotals: newFills,
-                                          goToCount: false,
-                                        );
-                                      });
-                                    },
-                                    icon: Icons.view_column,
-                                  );
-                                }
-                              : null,
-                          icon: const Icon(Icons.remove),
-                        ),
-                        IconButton(
-                          tooltip: 'Uniformizar poltronas',
-                          onPressed: () async {
-                            final messenger = ScaffoldMessenger.of(context);
-                            final ctrl = TextEditingController(text: '100');
-                            final ok = await material.showDialog<int?>(
-                              context: context,
-                              builder: (ctx) => material.AlertDialog(
-                                title: const material.Text(
-                                  'Uniformizar poltronas por fileira',
-                                ),
-                                content: material.TextField(
-                                  controller: ctrl,
-                                  keyboardType: material.TextInputType.number,
-                                  decoration: const material.InputDecoration(
-                                    labelText: 'Poltronas por fileira',
-                                    border: material.OutlineInputBorder(
-                                      borderRadius: material.BorderRadius.all(Radius.circular(12)),
+                      IconButton(
+                        tooltip: 'Remover última fileira',
+                        onPressed: _blockCtrls.length > 1
+                            ? () async {
+                                await _runWithOverlay('Alterando fileiras', () {
+                                  setState(() {
+                                    _blockCtrls.removeLast().dispose();
+                                    if (_rowGroupSteps.isNotEmpty) {
+                                      _rowGroupSteps.removeLast();
+                                    }
+                                    final newSizes = _blockCtrls
+                                        .map((c) => int.tryParse(c.text) ?? 0)
+                                        .map((v) => v < 0 ? 0 : v)
+                                        .toList();
+                                    final newRowSteps = List<int>.generate(
+                                      newSizes.length,
+                                      (i) => i < _rowGroupSteps.length
+                                          ? (_rowGroupSteps[i] <= 0
+                                                ? 1
+                                                : _rowGroupSteps[i])
+                                          : 1,
+                                    );
+                                    final newFills = List<int>.filled(
+                                      newSizes.length,
+                                      0,
+                                    );
+                                    widget.onApply(
+                                      newBlockSizes: newSizes,
+                                      newRowGroupSteps: newRowSteps,
+                                      newFillTotals: newFills,
+                                      goToCount: false,
+                                    );
+                                  });
+                                }, icon: Icons.view_column);
+                              }
+                            : null,
+                        icon: const Icon(Icons.remove),
+                      ),
+                      IconButton(
+                        tooltip: 'Uniformizar poltronas',
+                        onPressed: () async {
+                          final messenger = ScaffoldMessenger.of(context);
+                          final ctrl = TextEditingController(text: '100');
+                          final ok = await material.showDialog<int?>(
+                            context: context,
+                            builder: (ctx) => material.AlertDialog(
+                              title: const material.Text(
+                                'Uniformizar poltronas por fileira',
+                              ),
+                              content: material.TextField(
+                                controller: ctrl,
+                                keyboardType: material.TextInputType.number,
+                                decoration: const material.InputDecoration(
+                                  labelText: 'Poltronas por fileira',
+                                  border: material.OutlineInputBorder(
+                                    borderRadius: material.BorderRadius.all(
+                                      Radius.circular(12),
                                     ),
                                   ),
                                 ),
-                                actions: [
-                                  material.TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(ctx).pop(null),
-                                    child: const material.Text('Cancelar'),
-                                  ),
-                                  material.TextButton(
-                                    onPressed: () => Navigator.of(
-                                      ctx,
-                                    ).pop(int.tryParse(ctrl.text) ?? 0),
-                                    child: const material.Text('Aplicar'),
-                                  ),
-                                ],
+                              ),
+                              actions: [
+                                material.TextButton(
+                                  onPressed: () => Navigator.of(ctx).pop(null),
+                                  child: const material.Text('Cancelar'),
+                                ),
+                                material.TextButton(
+                                  onPressed: () => Navigator.of(
+                                    ctx,
+                                  ).pop(int.tryParse(ctrl.text) ?? 0),
+                                  child: const material.Text('Aplicar'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (ok != null && ok > 0) {
+                            setState(() {
+                              for (final c in _blockCtrls) {
+                                c.text = ok.toString();
+                              }
+                            });
+                            messenger.showSnackBar(
+                              const material.SnackBar(
+                                content: material.Text(
+                                  'Valores uniformes aplicados',
+                                ),
                               ),
                             );
-                            if (ok != null && ok > 0) {
-                              setState(() {
-                                for (final c in _blockCtrls) {
-                                  c.text = ok.toString();
-                                }
-                              });
-                              messenger.showSnackBar(
-                                const material.SnackBar(
-                                  content: material.Text('Valores uniformes aplicados'),
+                          }
+                        },
+                        icon: const Icon(Icons.view_column),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      for (final i in List<int>.generate(
+                        _blockCtrls.length,
+                        (k) => k,
+                      )) ...[
+                        SizedBox(
+                          width: math.min(
+                            360,
+                            MediaQuery.of(context).size.width - 48,
+                          ),
+                          child: _numberField(
+                            'Poltronas na fileira ${i + 1}',
+                            _blockCtrls[i],
+                            helper:
+                                'Total de poltronas nesta coluna (preenche de cima para baixo).',
+                          ),
+                        ),
+                        SizedBox(
+                          width: math.min(
+                            360,
+                            MediaQuery.of(context).size.width - 48,
+                          ),
+                          child: DropdownButtonFormField<int>(
+                            initialValue: i < _rowGroupSteps.length
+                                ? _rowGroupSteps[i]
+                                : 1,
+                            items: () {
+                              final current = i < _rowGroupSteps.length
+                                  ? _rowGroupSteps[i]
+                                  : 1;
+                              final base = List<int>.generate(10, (k) => k + 1);
+                              final opts = <DropdownMenuItem<int>>[
+                                for (final v in base)
+                                  DropdownMenuItem(
+                                    value: v,
+                                    child: Text('Agrupar em $v'),
+                                  ),
+                              ];
+                              if (current > 10) {
+                                opts.add(
+                                  DropdownMenuItem(
+                                    value: current,
+                                    child: Text('Agrupar em $current'),
+                                  ),
+                                );
+                              }
+                              opts.add(
+                                const DropdownMenuItem(
+                                  value: -1,
+                                  child: Text('Personalizado…'),
                                 ),
                               );
-                            }
-                          },
-  icon: const Icon(Icons.view_column),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        for (final i in List<int>.generate(_blockCtrls.length, (k) => k)) ...[
-                          SizedBox(
-                            width: math.min(360, MediaQuery.of(context).size.width - 48),
-                            child: _numberField(
-                              'Poltronas na fileira ${i + 1}',
-                              _blockCtrls[i],
-                              helper:
-                                  'Total de poltronas nesta coluna (preenche de cima para baixo).',
-                            ),
-                          ),
-                          SizedBox(
-                            width: math.min(360, MediaQuery.of(context).size.width - 48),
-                            child: DropdownButtonFormField<int>(
-                              initialValue: i < _rowGroupSteps.length
-                                  ? _rowGroupSteps[i]
-                                  : 1,
-                              items: () {
-                                final current = i < _rowGroupSteps.length
-                                    ? _rowGroupSteps[i]
-                                    : 1;
-                                final base = List<int>.generate(
-                                  10,
-                                  (k) => k + 1,
+                              return opts;
+                            }(),
+                            onChanged: (v) async {
+                              final messenger = ScaffoldMessenger.of(context);
+                              if (v == null) return;
+                              if (v == -1) {
+                                // Solicita valor personalizado
+                                final ctrl = TextEditingController(
+                                  text:
+                                      (i < _rowGroupSteps.length
+                                              ? _rowGroupSteps[i]
+                                              : 1)
+                                          .toString(),
                                 );
-                                final opts = <DropdownMenuItem<int>>[
-                                  for (final v in base)
-                                    DropdownMenuItem(
-                                      value: v,
-                                      child: Text('Agrupar em $v'),
+                                final custom = await material.showDialog<int?>(
+                                  context: context,
+                                  builder: (ctx) => material.AlertDialog(
+                                    title: material.Text(
+                                      'Agrupar na fileira ${i + 1}',
                                     ),
-                                ];
-                                if (current > 10) {
-                                  opts.add(
-                                    DropdownMenuItem(
-                                      value: current,
-                                      child: Text('Agrupar em $current'),
+                                    content: material.TextField(
+                                      controller: ctrl,
+                                      keyboardType:
+                                          material.TextInputType.number,
+                                      decoration:
+                                          const material.InputDecoration(
+                                            labelText: 'N em N por fileira',
+                                            border: material.OutlineInputBorder(
+                                              borderRadius:
+                                                  material.BorderRadius.all(
+                                                    Radius.circular(12),
+                                                  ),
+                                            ),
+                                          ),
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
+                                    ),
+                                    actions: [
+                                      material.TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(ctx).pop(null),
+                                        child: const material.Text('Cancelar'),
+                                      ),
+                                      material.TextButton(
+                                        onPressed: () => Navigator.of(
+                                          ctx,
+                                        ).pop(int.tryParse(ctrl.text) ?? 0),
+                                        child: const material.Text('Aplicar'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (!context.mounted) return;
+                                if (custom != null && custom > 0) {
+                                  setState(() {
+                                    _rowGroupSteps[i] = custom;
+                                  });
+                                } else if (custom != null && custom <= 0) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      icon: const Icon(Icons.error_outline),
+                                      title: const Text('Valor inválido'),
+                                      content: const Text(
+                                        'O agrupamento deve ser maior que 0.',
+                                      ),
+                                      actions: [
+                                        FilledButton(
+                                          onPressed: () =>
+                                              Navigator.of(ctx).pop(),
+                                          child: const Text('Entendi'),
+                                        ),
+                                      ],
                                     ),
                                   );
                                 }
-                                opts.add(
-                                  const DropdownMenuItem(
-                                    value: -1,
-                                    child: Text('Personalizado…'),
+                              } else {
+                                setState(() {
+                                  _rowGroupSteps[i] = v;
+                                });
+                              }
+                              // Autoaplicar alteração de organização para refletir na Contagem
+                              final newSizes = _blockCtrls
+                                  .map((c) => int.tryParse(c.text) ?? 0)
+                                  .map((v2) => v2 < 0 ? 0 : v2)
+                                  .toList();
+                              final newRowSteps = List<int>.generate(
+                                newSizes.length,
+                                (j) => j < _rowGroupSteps.length
+                                    ? (_rowGroupSteps[j] <= 0
+                                          ? 1
+                                          : _rowGroupSteps[j])
+                                    : 1,
+                              );
+                              final newFills = List<int>.filled(
+                                newSizes.length,
+                                0,
+                              );
+                              await _runWithOverlay(
+                                'Aplicando organização',
+                                () {
+                                  widget.onApply(
+                                    newBlockSizes: newSizes,
+                                    newRowGroupSteps: newRowSteps,
+                                    newFillTotals: newFills,
+                                    goToCount: false,
+                                  );
+                                },
+                                icon: Icons.tune,
+                              );
+                              final applied = i < _rowGroupSteps.length
+                                  ? _rowGroupSteps[i]
+                                  : 1;
+                              if (applied > widget.alertThreshold) {
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Aviso: agrupamento alto ($applied). Verifique se atende o layout.',
+                                    ),
                                   ),
                                 );
-                                return opts;
-                              }(),
-                              onChanged: (v) async {
-                                final messenger = ScaffoldMessenger.of(context);
-                                if (v == null) return;
-                                if (v == -1) {
-                                  // Solicita valor personalizado
+                              }
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Organização na fileira ${i + 1}',
+                              helperText: 'Selecione 1–10 ou “Personalizado…”',
+                              border: const OutlineInputBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
+                              ),
+                              suffixIcon: IconButton(
+                                tooltip: 'Editar agrupamento',
+                                icon: const Icon(Icons.edit),
+                                onPressed: () async {
+                                  final messenger = ScaffoldMessenger.of(
+                                    context,
+                                  );
                                   final ctrl = TextEditingController(
                                     text:
                                         (i < _rowGroupSteps.length
@@ -2882,38 +2973,84 @@ class _AuditoriumsScreenState extends State<_AuditoriumsScreen> {
                                       ),
                                       content: material.TextField(
                                         controller: ctrl,
-                                        keyboardType: material.TextInputType.number,
-                                        decoration: const material.InputDecoration(
-                                          labelText: 'N em N por fileira',
-                                          border: material.OutlineInputBorder(
-                                            borderRadius: material.BorderRadius.all(Radius.circular(12)),
-                                          ),
-                                        ),
+                                        keyboardType:
+                                            material.TextInputType.number,
+                                        decoration:
+                                            const material.InputDecoration(
+                                              labelText: 'N em N por fileira',
+                                              border:
+                                                  material.OutlineInputBorder(
+                                                    borderRadius:
+                                                        material
+                                                            .BorderRadius.all(
+                                                          Radius.circular(12),
+                                                        ),
+                                                  ),
+                                            ),
                                         inputFormatters: [
-                                          FilteringTextInputFormatter.digitsOnly,
+                                          FilteringTextInputFormatter
+                                              .digitsOnly,
                                         ],
                                       ),
                                       actions: [
-                                        material.TextButton(
+                                        TextButton(
                                           onPressed: () =>
                                               Navigator.of(ctx).pop(null),
-                                          child: const material.Text('Cancelar'),
+                                          child: const Text('Cancelar'),
                                         ),
-                                        material.TextButton(
+                                        TextButton(
                                           onPressed: () => Navigator.of(
                                             ctx,
                                           ).pop(int.tryParse(ctrl.text) ?? 0),
-                                          child: const material.Text('Aplicar'),
+                                          child: const Text('Aplicar'),
                                         ),
                                       ],
                                     ),
                                   );
-                                  if (!context.mounted) return;
                                   if (custom != null && custom > 0) {
                                     setState(() {
                                       _rowGroupSteps[i] = custom;
                                     });
+                                    final newSizes = _blockCtrls
+                                        .map((c) => int.tryParse(c.text) ?? 0)
+                                        .map((v2) => v2 < 0 ? 0 : v2)
+                                        .toList();
+                                    final newRowSteps = List<int>.generate(
+                                      newSizes.length,
+                                      (j) => j < _rowGroupSteps.length
+                                          ? (_rowGroupSteps[j] <= 0
+                                                ? 1
+                                                : _rowGroupSteps[j])
+                                          : 1,
+                                    );
+                                    final newFills = List<int>.filled(
+                                      newSizes.length,
+                                      0,
+                                    );
+                                    await _runWithOverlay(
+                                      'Aplicando organização',
+                                      () {
+                                        widget.onApply(
+                                          newBlockSizes: newSizes,
+                                          newRowGroupSteps: newRowSteps,
+                                          newFillTotals: newFills,
+                                          goToCount: false,
+                                        );
+                                      },
+                                      icon: Icons.tune,
+                                    );
+                                    if (!context.mounted) return;
+                                    if (custom > widget.alertThreshold) {
+                                      messenger.showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Aviso: agrupamento alto ($custom). Verifique se atende o layout.',
+                                          ),
+                                        ),
+                                      );
+                                    }
                                   } else if (custom != null && custom <= 0) {
+                                    if (!context.mounted) return;
                                     showDialog(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
@@ -2932,346 +3069,180 @@ class _AuditoriumsScreenState extends State<_AuditoriumsScreen> {
                                       ),
                                     );
                                   }
-                                } else {
-                                  setState(() {
-                                    _rowGroupSteps[i] = v;
-                                  });
-                                }
-                                // Autoaplicar alteração de organização para refletir na Contagem
-                                final newSizes = _blockCtrls
-                                    .map((c) => int.tryParse(c.text) ?? 0)
-                                    .map((v2) => v2 < 0 ? 0 : v2)
-                                    .toList();
-                                final newRowSteps = List<int>.generate(
-                                  newSizes.length,
-                                  (j) => j < _rowGroupSteps.length
-                                      ? (_rowGroupSteps[j] <= 0
-                                            ? 1
-                                            : _rowGroupSteps[j])
-                                      : 1,
-                                );
-                                final newFills = List<int>.filled(
-                                  newSizes.length,
-                                  0,
-                                );
-                                await _runWithOverlay(
-                                  'Aplicando organização',
-                                  () {
-                                    widget.onApply(
-                                      newBlockSizes: newSizes,
-                                      newRowGroupSteps: newRowSteps,
-                                      newFillTotals: newFills,
-                                      goToCount: false,
-                                    );
-                                  },
-                                  icon: Icons.tune,
-                                );
-                                final applied = i < _rowGroupSteps.length
-                                    ? _rowGroupSteps[i]
-                                    : 1;
-                                if (applied > widget.alertThreshold) {
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Botão único centralizado: Salvar organização
+                  Center(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        final sizes = _blockCtrls
+                            .map((c) => int.tryParse(c.text) ?? 0)
+                            .map((v) => v < 0 ? 0 : v)
+                            .toList();
+                        if (sizes.isEmpty) {
+                          messenger.showSnackBar(
+                            const SnackBar(
+                              content: Text('Informe ao menos uma fileira'),
+                            ),
+                          );
+                          return;
+                        }
+                        final steps = List<int>.generate(
+                          sizes.length,
+                          (i) => i < _rowGroupSteps.length
+                              ? (_rowGroupSteps[i] <= 0 ? 1 : _rowGroupSteps[i])
+                              : 1,
+                        );
+                        final fills = List<int>.filled(sizes.length, 0);
+                        await _runWithOverlay('Salvando organização', () {
+                          widget.onSaveOrganization(
+                            newBlockSizes: sizes,
+                            newRowGroupSteps: steps,
+                            newFillTotals: fills,
+                          );
+                        }, icon: Icons.save_outlined);
+                        if (!mounted) return;
+                        messenger.showSnackBar(
+                          const SnackBar(content: Text('Organização salva')),
+                        );
+                      },
+                      icon: const Icon(Icons.save_outlined),
+                      label: const Text('Salvar organização'),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
+                  const Text('Entendendo a configuração:'),
+                  const SizedBox(height: 2),
+                  const Text(
+                    '- Poltronas na fileira: capacidade de cada fileira (coluna).',
+                  ),
+                  const Text(
+                    '- Corredor vertical: é inserido conforme “N em N” definido em cada fileira.',
+                  ),
+                  const SizedBox(height: 12),
+                  // Preferências de UI e validações (agora no final)
+                  Card(
+                    elevation: 0,
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest
+                        .withValues(
+                          alpha: Theme.of(context).brightness == Brightness.dark
+                              ? 0.35
+                              : 0.22,
+                        ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Preferências',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _thresholdCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'Teto de alerta do agrupamento',
+                              helperText:
+                                  'Aviso quando N por fileira excede este valor',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
+                              ),
+                            ),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            validator: (v) {
+                              final t = v?.trim() ?? '';
+                              if (t.isEmpty) return 'Informe um número';
+                              final n = int.tryParse(t);
+                              if (n == null) return 'Apenas dígitos';
+                              if (n <= 0) return 'Deve ser maior que 0';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<bool>(
+                            initialValue: _prefUseTertiary,
+                            decoration: const InputDecoration(
+                              labelText: 'Cor do badge do Total',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
+                              ),
+                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                value: false,
+                                child: Text('Primária'),
+                              ),
+                              DropdownMenuItem(
+                                value: true,
+                                child: Text('Terciária'),
+                              ),
+                            ],
+                            onChanged: (v) => setState(() {
+                              if (v != null) _prefUseTertiary = v;
+                            }),
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: FilledButton.icon(
+                              icon: const Icon(Icons.save),
+                              label: const Text('Salvar Preferências'),
+                              onPressed: () async {
+                                final form = Form.of(context);
+                                if (form.validate()) {
+                                  final messenger = ScaffoldMessenger.of(
+                                    context,
+                                  );
+                                  final th = int.tryParse(
+                                    _thresholdCtrl.text.trim(),
+                                  );
+                                  await _runWithOverlay(
+                                    'Salvando preferências',
+                                    () {
+                                      widget.onUpdatePrefs(
+                                        newAlertThreshold: th,
+                                        newUseTertiaryTotalBadge:
+                                            _prefUseTertiary,
+                                      );
+                                    },
+                                    icon: Icons.save,
+                                  );
+                                  if (!mounted) return;
                                   messenger.showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Aviso: agrupamento alto ($applied). Verifique se atende o layout.',
-                                      ),
+                                    const SnackBar(
+                                      content: Text('Preferências salvas'),
                                     ),
                                   );
                                 }
                               },
-                              decoration: InputDecoration(
-                                labelText: 'Organização na fileira ${i + 1}',
-                                helperText:
-                                    'Selecione 1–10 ou “Personalizado…”',
-                                border: const OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                                ),
-                                suffixIcon: IconButton(
-                                  tooltip: 'Editar agrupamento',
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () async {
-                                    final messenger =
-                                        ScaffoldMessenger.of(context);
-                                    final ctrl = TextEditingController(
-                                      text: (i < _rowGroupSteps.length
-                                              ? _rowGroupSteps[i]
-                                              : 1)
-                                          .toString(),
-                                    );
-                                    final custom = await material.showDialog<int?>(
-                                      context: context,
-                                      builder: (ctx) => material.AlertDialog(
-                                        title: material.Text(
-                                            'Agrupar na fileira ${i + 1}'),
-                                        content: material.TextField(
-                                          controller: ctrl,
-                                          keyboardType: material.TextInputType.number,
-                                          decoration: const material.InputDecoration(
-                                            labelText: 'N em N por fileira',
-                                            border: material.OutlineInputBorder(
-                                              borderRadius: material.BorderRadius.all(Radius.circular(12)),
-                                            ),
-                                          ),
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter.digitsOnly,
-                                          ],
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(ctx).pop(null),
-                                            child: const Text('Cancelar'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () => Navigator.of(
-                                              ctx,
-                                            ).pop(int.tryParse(ctrl.text) ?? 0),
-                                            child: const Text('Aplicar'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                    if (custom != null && custom > 0) {
-                                      setState(() {
-                                        _rowGroupSteps[i] = custom;
-                                      });
-                                      final newSizes = _blockCtrls
-                                          .map((c) => int.tryParse(c.text) ?? 0)
-                                          .map((v2) => v2 < 0 ? 0 : v2)
-                                          .toList();
-                                      final newRowSteps = List<int>.generate(
-                                        newSizes.length,
-                                        (j) => j < _rowGroupSteps.length
-                                            ? (_rowGroupSteps[j] <= 0
-                                                  ? 1
-                                                  : _rowGroupSteps[j])
-                                            : 1,
-                                      );
-                                      final newFills = List<int>.filled(
-                                        newSizes.length,
-                                        0,
-                                      );
-                                      await _runWithOverlay(
-                                        'Aplicando organização',
-                                        () {
-                                          widget.onApply(
-                                            newBlockSizes: newSizes,
-                                            newRowGroupSteps: newRowSteps,
-                                            newFillTotals: newFills,
-                                            goToCount: false,
-                                          );
-                                        },
-                                        icon: Icons.tune,
-                                      );
-                                      if (!context.mounted) return;
-                                      if (custom > widget.alertThreshold) {
-                                        messenger.showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Aviso: agrupamento alto ($custom). Verifique se atende o layout.',
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    } else if (custom != null && custom <= 0) {
-                                      if (!context.mounted) return;
-                                      showDialog(
-                                        context: context,
-                                        builder: (ctx) => AlertDialog(
-                                          icon: const Icon(Icons.error_outline),
-                                          title: const Text('Valor inválido'),
-                                          content: const Text(
-                                            'O agrupamento deve ser maior que 0.',
-                                          ),
-                                          actions: [
-                                            FilledButton(
-                                              onPressed: () =>
-                                                  Navigator.of(ctx).pop(),
-                                              child: const Text('Entendi'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
                             ),
                           ),
                         ],
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    // Botão único centralizado: Salvar organização
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          final messenger = ScaffoldMessenger.of(context);
-                          final sizes = _blockCtrls
-                              .map((c) => int.tryParse(c.text) ?? 0)
-                              .map((v) => v < 0 ? 0 : v)
-                              .toList();
-                          if (sizes.isEmpty) {
-                            messenger.showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Informe ao menos uma fileira',
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-                          final steps = List<int>.generate(
-                            sizes.length,
-                            (i) => i < _rowGroupSteps.length
-                                ? (_rowGroupSteps[i] <= 0
-                                      ? 1
-                                      : _rowGroupSteps[i])
-                                : 1,
-                          );
-                          final fills = List<int>.filled(sizes.length, 0);
-                          await _runWithOverlay('Salvando organização', () {
-                            widget.onSaveOrganization(
-                              newBlockSizes: sizes,
-                              newRowGroupSteps: steps,
-                              newFillTotals: fills,
-                            );
-                          }, icon: Icons.save_outlined);
-                          if (!mounted) return;
-                          messenger.showSnackBar(
-                            const SnackBar(
-                              content: Text('Organização salva'),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.save_outlined),
-                        label: const Text('Salvar organização'),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    const SizedBox(height: 12),
-                    const Text('Entendendo a configuração:'),
-                    const SizedBox(height: 2),
-                    const Text(
-                      '- Poltronas na fileira: capacidade de cada fileira (coluna).',
-                    ),
-                    const Text(
-                      '- Corredor vertical: é inserido conforme “N em N” definido em cada fileira.',
-                    ),
-                    const SizedBox(height: 12),
-                    // Preferências de UI e validações (agora no final)
-                    Card(
-                      elevation: 0,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest
-                          .withValues(
-                            alpha:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? 0.35
-                                : 0.22,
-                          ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Preferências',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              controller: _thresholdCtrl,
-                              decoration: const InputDecoration(
-                                labelText: 'Teto de alerta do agrupamento',
-                                helperText:
-                                    'Aviso quando N por fileira excede este valor',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                                ),
-                              ),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              validator: (v) {
-                                final t = v?.trim() ?? '';
-                                if (t.isEmpty) return 'Informe um número';
-                                final n = int.tryParse(t);
-                                if (n == null) return 'Apenas dígitos';
-                                if (n <= 0) return 'Deve ser maior que 0';
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            DropdownButtonFormField<bool>(
-                              initialValue: _prefUseTertiary,
-                              decoration: const InputDecoration(
-                                labelText: 'Cor do badge do Total',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                                ),
-                              ),
-                              items: const [
-                                DropdownMenuItem(
-                                  value: false,
-                                  child: Text('Primária'),
-                                ),
-                                DropdownMenuItem(
-                                  value: true,
-                                  child: Text('Terciária'),
-                                ),
-                              ],
-                              onChanged: (v) => setState(() {
-                                if (v != null) _prefUseTertiary = v;
-                              }),
-                            ),
-                            const SizedBox(height: 8),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: FilledButton.icon(
-                                icon: const Icon(Icons.save),
-                                label: const Text('Salvar Preferências'),
-                                onPressed: () async {
-                                  final form = Form.of(context);
-                                  if (form.validate()) {
-                                    final messenger = ScaffoldMessenger.of(
-                                      context,
-                                    );
-                                    final th = int.tryParse(
-                                      _thresholdCtrl.text.trim(),
-                                    );
-                                    await _runWithOverlay(
-                                      'Salvando preferências',
-                                      () {
-                                        widget.onUpdatePrefs(
-                                          newAlertThreshold: th,
-                                          newUseTertiaryTotalBadge:
-                                              _prefUseTertiary,
-                                        );
-                                      },
-                                      icon: Icons.save,
-                                    );
-                                    if (!mounted) return;
-                                    messenger.showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Preferências salvas'),
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -3429,16 +3400,18 @@ class _RecordsScreenState extends State<_RecordsScreen> {
 
   void _rebuildSearchIndex() {
     final df = DateFormat('dd/MM/yyyy HH:mm');
-    _searchIndexLower = widget.records.map((r) {
-      final base = [
-        r.meetingType,
-        r.indicators.join(', '),
-        r.notes ?? '',
-        df.format(r.dateTime),
-        r.perBlockOccupied.isNotEmpty ? r.perBlockOccupied.join(',') : '',
-      ].join(' ').toLowerCase();
-      return base;
-    }).toList(growable: false);
+    _searchIndexLower = widget.records
+        .map((r) {
+          final base = [
+            r.meetingType,
+            r.indicators.join(', '),
+            r.notes ?? '',
+            df.format(r.dateTime),
+            r.perBlockOccupied.isNotEmpty ? r.perBlockOccupied.join(',') : '',
+          ].join(' ').toLowerCase();
+          return base;
+        })
+        .toList(growable: false);
   }
 
   Future<void> _loadUIPrefs() async {
@@ -3543,7 +3516,8 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                     .map((s) => s.trim().toLowerCase())
                     .where((s) => s.isNotEmpty)
                     .toSet();
-                if (mts.isNotEmpty && !mts.contains(r.meetingType.toLowerCase())) {
+                if (mts.isNotEmpty &&
+                    !mts.contains(r.meetingType.toLowerCase())) {
                   continue;
                 }
               }
@@ -3625,227 +3599,380 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                     Align(
                                       alignment: Alignment.center,
                                       child: SizedBox(
-                                        width: math.min(420, MediaQuery.of(context).size.width - 48),
+                                        width: math.min(
+                                          420,
+                                          MediaQuery.of(context).size.width -
+                                              48,
+                                        ),
                                         child: TextField(
                                           decoration: const InputDecoration(
                                             labelText: 'Filtrar registros',
-                                            hintText: 'Reunião, indicador, data, notas…',
+                                            hintText:
+                                                'Reunião, indicador, data, notas…',
                                             border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(Radius.circular(12)),
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(12),
+                                              ),
                                             ),
                                             prefixIcon: Icon(Icons.search),
                                           ),
-                                    onChanged: (v) {
-                                      final text = v.trim();
-                                      // Ao apagar o nome/termo, aplica imediatamente e volta todos registros
-                                      if (text.isEmpty) {
-                                        _qDebounce?.cancel();
-                                        filter.value = filter.value.copyWith(query: '');
-                                        page.value = 0;
-                                        _saveUIPrefs();
-                                        return;
-                                      }
-                                      _qDebounce?.cancel();
-                                      _qDebounce = Timer(const Duration(milliseconds: 250), () {
-                                        filter.value = filter.value.copyWith(query: v);
-                                        page.value = 0;
-                                        _saveUIPrefs();
-                                      });
-                                    },
-                                    onSubmitted: (v) {
-                                      _qDebounce?.cancel();
-                                      filter.value = filter.value.copyWith(query: v);
-                                      page.value = 0;
-                                      _saveUIPrefs();
-                                    },
+                                          onChanged: (v) {
+                                            final text = v.trim();
+                                            // Ao apagar o nome/termo, aplica imediatamente e volta todos registros
+                                            if (text.isEmpty) {
+                                              _qDebounce?.cancel();
+                                              filter.value = filter.value
+                                                  .copyWith(query: '');
+                                              page.value = 0;
+                                              _saveUIPrefs();
+                                              return;
+                                            }
+                                            _qDebounce?.cancel();
+                                            _qDebounce = Timer(
+                                              const Duration(milliseconds: 250),
+                                              () {
+                                                filter.value = filter.value
+                                                    .copyWith(query: v);
+                                                page.value = 0;
+                                                _saveUIPrefs();
+                                              },
+                                            );
+                                          },
+                                          onSubmitted: (v) {
+                                            _qDebounce?.cancel();
+                                            filter.value = filter.value
+                                                .copyWith(query: v);
+                                            page.value = 0;
+                                            _saveUIPrefs();
+                                          },
                                         ),
                                       ),
                                     ),
                                     const SizedBox(height: 6),
                                     ExpansionTile(
-                                      title: const Center(child: Text('Filtros avançados')),
-                                      childrenPadding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 8,
+                                      title: const Center(
+                                        child: Text('Filtros avançados'),
                                       ),
+                                      childrenPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 8,
+                                          ),
                                       children: [
                                         Wrap(
                                           spacing: 8,
                                           runSpacing: 8,
                                           alignment: WrapAlignment.center,
-                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
                                           children: [
-                                    SizedBox(
-                                      width: math.min(360, MediaQuery.of(context).size.width - 48),
-                                      child: FilledButton.tonalIcon(
-                                        icon: const Icon(Icons.groups_2),
-                                        label: Text(() {
-                                          final mt = filter.value.meetingType?.trim() ?? '';
-                                          if (mt.isEmpty) return 'Reuniões: Todas';
-                                          final sel = mt
-                                              .split(',')
-                                              .map((s) => s.trim())
-                                              .where((s) => s.isNotEmpty)
-                                              .toList();
-                                          return sel.length == 1
-                                              ? 'Reunião: ${sel.first}'
-                                              : 'Reuniões: ${sel.length} selecionadas';
-                                        }()),
-                                        onPressed: () async {
-                                          final mt = filter.value.meetingType?.trim() ?? '';
-                                          final initial = mt
-                                              .split(',')
-                                              .map((s) => s.trim())
-                                              .where((s) => s.isNotEmpty)
-                                              .toSet();
-                                          final result = await showDialog<List<String>>(
-                                            context: context,
-                                            builder: (ctx) {
-                                              final selected = initial.toSet();
-                                              return StatefulBuilder(
-                                                builder: (ctx, setState) {
-                                                  return AlertDialog(
-                                                    title: const Text('Selecionar reuniões'),
-                                                    content: SingleChildScrollView(
-                                                      child: Column(
-                                                        mainAxisSize: MainAxisSize.min,
-                                                        children: [
-                                                          CheckboxListTile(
-                                                            value: selected.isEmpty,
-                                                            onChanged: (v) {
-                                                              setState(() {
-                                                                if (v == true) {
-                                                                  selected.clear();
-                                                                }
-                                                              });
-                                                            },
-                                                            title: const Text('Todas'),
-                                                          ),
-                                                          const Divider(height: 8),
-                                                          for (final t in kMeetingTypes)
-                                                            CheckboxListTile(
-                                                              value: selected.contains(t),
-                                                              onChanged: (v) {
-                                                                setState(() {
-                                                                  if (v == true) {
-                                                                    selected.add(t);
-                                                                  } else {
-                                                                    selected.remove(t);
-                                                                  }
-                                                                });
-                                                              },
-                                                              title: Text(t),
+                                            SizedBox(
+                                              width: math.min(
+                                                360,
+                                                MediaQuery.of(
+                                                      context,
+                                                    ).size.width -
+                                                    48,
+                                              ),
+                                              child: FilledButton.tonalIcon(
+                                                icon: const Icon(
+                                                  Icons.groups_2,
+                                                ),
+                                                label: Text(() {
+                                                  final mt =
+                                                      filter.value.meetingType
+                                                          ?.trim() ??
+                                                      '';
+                                                  if (mt.isEmpty)
+                                                    return 'Reuniões: Todas';
+                                                  final sel = mt
+                                                      .split(',')
+                                                      .map((s) => s.trim())
+                                                      .where(
+                                                        (s) => s.isNotEmpty,
+                                                      )
+                                                      .toList();
+                                                  return sel.length == 1
+                                                      ? 'Reunião: ${sel.first}'
+                                                      : 'Reuniões: ${sel.length} selecionadas';
+                                                }()),
+                                                onPressed: () async {
+                                                  final mt =
+                                                      filter.value.meetingType
+                                                          ?.trim() ??
+                                                      '';
+                                                  final initial = mt
+                                                      .split(',')
+                                                      .map((s) => s.trim())
+                                                      .where(
+                                                        (s) => s.isNotEmpty,
+                                                      )
+                                                      .toSet();
+                                                  final result = await showDialog<List<String>>(
+                                                    context: context,
+                                                    builder: (ctx) {
+                                                      final selected = initial
+                                                          .toSet();
+                                                      return StatefulBuilder(
+                                                        builder: (ctx, setState) {
+                                                          return AlertDialog(
+                                                            title: const Text(
+                                                              'Selecionar reuniões',
                                                             ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () => Navigator.pop(ctx, null),
-                                                        child: const Text('Cancelar'),
-                                                      ),
-                                                      FilledButton(
-                                                        onPressed: () => Navigator.pop(ctx, selected.toList()),
-                                                        child: const Text('Aplicar'),
-                                                      ),
-                                                    ],
+                                                            content: SingleChildScrollView(
+                                                              child: Column(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
+                                                                children: [
+                                                                  CheckboxListTile(
+                                                                    value: selected
+                                                                        .isEmpty,
+                                                                    onChanged: (v) {
+                                                                      setState(() {
+                                                                        if (v ==
+                                                                            true) {
+                                                                          selected
+                                                                              .clear();
+                                                                        }
+                                                                      });
+                                                                    },
+                                                                    title:
+                                                                        const Text(
+                                                                          'Todas',
+                                                                        ),
+                                                                  ),
+                                                                  const Divider(
+                                                                    height: 8,
+                                                                  ),
+                                                                  for (final t
+                                                                      in kMeetingTypes)
+                                                                    CheckboxListTile(
+                                                                      value: selected
+                                                                          .contains(
+                                                                            t,
+                                                                          ),
+                                                                      onChanged: (v) {
+                                                                        setState(() {
+                                                                          if (v ==
+                                                                              true) {
+                                                                            selected.add(
+                                                                              t,
+                                                                            );
+                                                                          } else {
+                                                                            selected.remove(
+                                                                              t,
+                                                                            );
+                                                                          }
+                                                                        });
+                                                                      },
+                                                                      title:
+                                                                          Text(
+                                                                            t,
+                                                                          ),
+                                                                    ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () =>
+                                                                    Navigator.pop(
+                                                                      ctx,
+                                                                      null,
+                                                                    ),
+                                                                child:
+                                                                    const Text(
+                                                                      'Cancelar',
+                                                                    ),
+                                                              ),
+                                                              FilledButton(
+                                                                onPressed: () =>
+                                                                    Navigator.pop(
+                                                                      ctx,
+                                                                      selected
+                                                                          .toList(),
+                                                                    ),
+                                                                child:
+                                                                    const Text(
+                                                                      'Aplicar',
+                                                                    ),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    },
                                                   );
+                                                  if (result != null) {
+                                                    final next = result
+                                                        .where(
+                                                          (s) => s
+                                                              .trim()
+                                                              .isNotEmpty,
+                                                        )
+                                                        .toList();
+                                                    filter.value = filter.value
+                                                        .copyWith(
+                                                          meetingType:
+                                                              next.isEmpty
+                                                              ? null
+                                                              : next.join(','),
+                                                        );
+                                                    page.value = 0;
+                                                    _saveUIPrefs();
+                                                  }
                                                 },
-                                              );
-                                            },
-                                          );
-                                          if (result != null) {
-                                            final next = result.where((s) => s.trim().isNotEmpty).toList();
-                                            filter.value = filter.value.copyWith(
-                                              meetingType: next.isEmpty ? null : next.join(','),
-                                            );
-                                            page.value = 0;
-                                            _saveUIPrefs();
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                    FilledButton.tonalIcon(
-                                      icon: const Icon(Icons.date_range),
-                                      label: Text(
-                                        filter.value.start == null &&
-                                                filter.value.end == null
-                                            ? 'Período'
-                                            : '${DateFormat('dd/MM/yy').format(filter.value.start!)} — ${DateFormat('dd/MM/yy').format(filter.value.end!)}',
-                                      ),
-                                      onPressed: () async {
-                                        final picked = await showDateRangePicker(
-                                          context: context,
-                                          firstDate: DateTime(2020),
-                                          lastDate: DateTime(2100),
-                                        );
-                                        if (picked != null) {
-                                          final start = DateTime(picked.start.year, picked.start.month, picked.start.day);
-                                          final end = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59, 999);
-                                          filter.value = filter.value.copyWith(
-                                            start: start,
-                                            end: end,
-                                          );
-                                          page.value = 0;
-                                          _saveUIPrefs();
-                                        }
-                                      },
-                                    ),
-                                    FilledButton.tonalIcon(
-                                      icon: const Icon(Icons.event),
-                                      label: const Text('Dia'),
-                                      onPressed: () async {
-                                        final d = await showDatePicker(
-                                          context: context,
-                                          firstDate: DateTime(2020),
-                                          lastDate: DateTime(2100),
-                                          initialDate: filter.value.start ?? DateTime.now(),
-                                        );
-                                        if (d != null) {
-                                          final start = DateTime(d.year, d.month, d.day);
-                                          final end = DateTime(d.year, d.month, d.day, 23, 59, 59, 999);
-                                          filter.value = filter.value.copyWith(start: start, end: end);
-                                          page.value = 0;
-                                          _saveUIPrefs();
-                                        }
-                                      },
-                                    ),
-                                    FilledButton.tonalIcon(
-                                      icon: const Icon(Icons.calendar_view_month),
-                                      label: const Text('Mês'),
-                                      onPressed: () async {
-                                        final now = DateTime.now();
-                                        final y = now.year;
-                                        final m = now.month;
-                                        final start = DateTime(y, m, 1);
-                                        final end = DateTime(y, m + 1, 1).subtract(const Duration(milliseconds: 1));
-                                        filter.value = filter.value.copyWith(start: start, end: end);
-                                        page.value = 0;
-                                        _saveUIPrefs();
-                                      },
-                                    ),
-                                    FilledButton.tonalIcon(
-                                      icon: const Icon(Icons.event_available),
-                                      label: const Text('Ano'),
-                                      onPressed: () async {
-                                        final now = DateTime.now();
-                                        final y = now.year;
-                                        final start = DateTime(y, 1, 1);
-                                        final end = DateTime(y + 1, 1, 1).subtract(const Duration(milliseconds: 1));
-                                        filter.value = filter.value.copyWith(start: start, end: end);
-                                        page.value = 0;
-                                        _saveUIPrefs();
-                                      },
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        // Não atualiza diretamente o campo de texto; apenas o filtro.
-                                        filter.value = const _RecordsFilter();
-                                        page.value = 0;
-                                        _saveUIPrefs();
-                                      },
-                                      child: const Text('Limpar filtros'),
-                                    ),
+                                              ),
+                                            ),
+                                            FilledButton.tonalIcon(
+                                              icon: const Icon(
+                                                Icons.date_range,
+                                              ),
+                                              label: Text(
+                                                filter.value.start == null &&
+                                                        filter.value.end == null
+                                                    ? 'Período'
+                                                    : '${DateFormat('dd/MM/yy').format(filter.value.start!)} — ${DateFormat('dd/MM/yy').format(filter.value.end!)}',
+                                              ),
+                                              onPressed: () async {
+                                                final picked =
+                                                    await showDateRangePicker(
+                                                      context: context,
+                                                      firstDate: DateTime(2020),
+                                                      lastDate: DateTime(2100),
+                                                    );
+                                                if (picked != null) {
+                                                  final start = DateTime(
+                                                    picked.start.year,
+                                                    picked.start.month,
+                                                    picked.start.day,
+                                                  );
+                                                  final end = DateTime(
+                                                    picked.end.year,
+                                                    picked.end.month,
+                                                    picked.end.day,
+                                                    23,
+                                                    59,
+                                                    59,
+                                                    999,
+                                                  );
+                                                  filter.value = filter.value
+                                                      .copyWith(
+                                                        start: start,
+                                                        end: end,
+                                                      );
+                                                  page.value = 0;
+                                                  _saveUIPrefs();
+                                                }
+                                              },
+                                            ),
+                                            FilledButton.tonalIcon(
+                                              icon: const Icon(Icons.event),
+                                              label: const Text('Dia'),
+                                              onPressed: () async {
+                                                final d = await showDatePicker(
+                                                  context: context,
+                                                  firstDate: DateTime(2020),
+                                                  lastDate: DateTime(2100),
+                                                  initialDate:
+                                                      filter.value.start ??
+                                                      DateTime.now(),
+                                                );
+                                                if (d != null) {
+                                                  final start = DateTime(
+                                                    d.year,
+                                                    d.month,
+                                                    d.day,
+                                                  );
+                                                  final end = DateTime(
+                                                    d.year,
+                                                    d.month,
+                                                    d.day,
+                                                    23,
+                                                    59,
+                                                    59,
+                                                    999,
+                                                  );
+                                                  filter.value = filter.value
+                                                      .copyWith(
+                                                        start: start,
+                                                        end: end,
+                                                      );
+                                                  page.value = 0;
+                                                  _saveUIPrefs();
+                                                }
+                                              },
+                                            ),
+                                            FilledButton.tonalIcon(
+                                              icon: const Icon(
+                                                Icons.calendar_view_month,
+                                              ),
+                                              label: const Text('Mês'),
+                                              onPressed: () async {
+                                                final now = DateTime.now();
+                                                final y = now.year;
+                                                final m = now.month;
+                                                final start = DateTime(y, m, 1);
+                                                final end =
+                                                    DateTime(
+                                                      y,
+                                                      m + 1,
+                                                      1,
+                                                    ).subtract(
+                                                      const Duration(
+                                                        milliseconds: 1,
+                                                      ),
+                                                    );
+                                                filter.value = filter.value
+                                                    .copyWith(
+                                                      start: start,
+                                                      end: end,
+                                                    );
+                                                page.value = 0;
+                                                _saveUIPrefs();
+                                              },
+                                            ),
+                                            FilledButton.tonalIcon(
+                                              icon: const Icon(
+                                                Icons.event_available,
+                                              ),
+                                              label: const Text('Ano'),
+                                              onPressed: () async {
+                                                final now = DateTime.now();
+                                                final y = now.year;
+                                                final start = DateTime(y, 1, 1);
+                                                final end =
+                                                    DateTime(
+                                                      y + 1,
+                                                      1,
+                                                      1,
+                                                    ).subtract(
+                                                      const Duration(
+                                                        milliseconds: 1,
+                                                      ),
+                                                    );
+                                                filter.value = filter.value
+                                                    .copyWith(
+                                                      start: start,
+                                                      end: end,
+                                                    );
+                                                page.value = 0;
+                                                _saveUIPrefs();
+                                              },
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                // Não atualiza diretamente o campo de texto; apenas o filtro.
+                                                filter.value =
+                                                    const _RecordsFilter();
+                                                page.value = 0;
+                                                _saveUIPrefs();
+                                              },
+                                              child: const Text(
+                                                'Limpar filtros',
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ],
@@ -3856,15 +3983,25 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                       spacing: 12,
                                       runSpacing: 8,
                                       alignment: WrapAlignment.center,
-                                      crossAxisAlignment: WrapCrossAlignment.center,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
                                       children: [
                                         Chip(
-                                          label: Text('Resultados: ${filtered.length}')
+                                          label: Text(
+                                            'Resultados: ${filtered.length}',
+                                          ),
                                         ),
-                                        if ((filter.value.meetingType?.isNotEmpty ?? false))
+                                        if ((filter
+                                                .value
+                                                .meetingType
+                                                ?.isNotEmpty ??
+                                            false))
                                           Chip(
                                             label: Text(() {
-                                              final mt = filter.value.meetingType!.split(',')
+                                              final mt = filter
+                                                  .value
+                                                  .meetingType!
+                                                  .split(',')
                                                   .map((s) => s.trim())
                                                   .where((s) => s.isNotEmpty)
                                                   .toList();
@@ -3879,125 +4016,156 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                     Wrap(
                                       spacing: 8,
                                       runSpacing: 8,
-                                      crossAxisAlignment: WrapCrossAlignment.center,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
                                       children: [
-                                SizedBox(
-                                  width: math.min(360, MediaQuery.of(context).size.width - 48),
-                                  child: DropdownButtonFormField<int>(
-                                    initialValue: pageSize.value,
-                                    items: const [5, 10, 20, 50]
-                                        .map(
-                                          (n) => DropdownMenuItem(
-                                            value: n,
-                                            child: Text('$n'),
+                                        SizedBox(
+                                          width: math.min(
+                                            360,
+                                            MediaQuery.of(context).size.width -
+                                                48,
                                           ),
-                                        )
-                                        .toList(),
-                                    onChanged: (v) {
-                                      pageSize.value = v ?? 5;
-                                      page.value = 0;
-                                      _saveUIPrefs();
-                                    },
-                                    decoration: const InputDecoration(
-                                      labelText: 'Itens por página',
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: math.min(360, MediaQuery.of(context).size.width - 48),
-                                  child: DropdownButtonFormField<SortColumn>(
-                                    initialValue: sort.value.column,
-                                    items: const [
-                                      DropdownMenuItem(
-                                        value: SortColumn.dateTime,
-                                        child: Text('Data/Hora'),
-                                      ),
-                                      DropdownMenuItem(
-                                        value: SortColumn.meetingType,
-                                        child: Text('Reunião'),
-                                      ),
-                                      DropdownMenuItem(
-                                        value: SortColumn.indicators,
-                                        child: Text('Indicadores'),
-                                      ),
-                                      DropdownMenuItem(
-                                        value: SortColumn.occupied,
-                                        child: Text('Ocupados'),
-                                      ),
-                                      DropdownMenuItem(
-                                        value: SortColumn.standing,
-                                        child: Text('Em pé'),
-                                      ),
-                                      DropdownMenuItem(
-                                        value: SortColumn.total,
-                                        child: Text('Total'),
-                                      ),
-                                    ],
-                                    onChanged: (v) {
-                                      sort.value = _SortConfig(
-                                        column: v ?? SortColumn.dateTime,
-                                        ascending: sort.value.ascending,
-                                      );
-                                      page.value = 0;
-                                      _saveUIPrefs();
-                                    },
-                                    decoration: const InputDecoration(
-                                      labelText: 'Ordenar por',
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  tooltip: sort.value.ascending
-                                      ? 'Ordem crescente'
-                                      : 'Ordem decrescente',
-                                  onPressed: () {
-                                    sort.value = _SortConfig(
-                                      column: sort.value.column,
-                                      ascending: !sort.value.ascending,
-                                    );
-                                    _saveUIPrefs();
-                                  },
-                                  icon: Icon(
-                                    sort.value.ascending
-                                        ? Icons.arrow_upward
-                                        : Icons.arrow_downward,
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    IconButton(
-                                      tooltip: 'Página anterior',
-                                      onPressed: safePage > 0
-                                          ? () {
-                                              page.value = safePage - 1;
+                                          child: DropdownButtonFormField<int>(
+                                            initialValue: pageSize.value,
+                                            items: const [5, 10, 20, 50]
+                                                .map(
+                                                  (n) => DropdownMenuItem(
+                                                    value: n,
+                                                    child: Text('$n'),
+                                                  ),
+                                                )
+                                                .toList(),
+                                            onChanged: (v) {
+                                              pageSize.value = v ?? 5;
+                                              page.value = 0;
                                               _saveUIPrefs();
-                                            }
-                                          : null,
-                                      icon: const Icon(Icons.chevron_left),
-                                    ),
-                                    Text(
-                                      'Página ${safePage + 1} de $totalPages',
-                                    ),
-                                    IconButton(
-                                      tooltip: 'Próxima página',
-                                      onPressed: (safePage + 1 < totalPages)
-                                          ? () {
-                                              page.value = safePage + 1;
-                                              _saveUIPrefs();
-                                            }
-                                          : null,
-                                      icon: const Icon(Icons.chevron_right),
-                                    ),
-                                  ],
-                                ),
+                                            },
+                                            decoration: const InputDecoration(
+                                              labelText: 'Itens por página',
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(12),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: math.min(
+                                            360,
+                                            MediaQuery.of(context).size.width -
+                                                48,
+                                          ),
+                                          child:
+                                              DropdownButtonFormField<
+                                                SortColumn
+                                              >(
+                                                initialValue: sort.value.column,
+                                                items: const [
+                                                  DropdownMenuItem(
+                                                    value: SortColumn.dateTime,
+                                                    child: Text('Data/Hora'),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value:
+                                                        SortColumn.meetingType,
+                                                    child: Text('Reunião'),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value:
+                                                        SortColumn.indicators,
+                                                    child: Text('Indicadores'),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: SortColumn.occupied,
+                                                    child: Text('Ocupados'),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: SortColumn.standing,
+                                                    child: Text('Em pé'),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: SortColumn.total,
+                                                    child: Text('Total'),
+                                                  ),
+                                                ],
+                                                onChanged: (v) {
+                                                  sort.value = _SortConfig(
+                                                    column:
+                                                        v ??
+                                                        SortColumn.dateTime,
+                                                    ascending:
+                                                        sort.value.ascending,
+                                                  );
+                                                  page.value = 0;
+                                                  _saveUIPrefs();
+                                                },
+                                                decoration:
+                                                    const InputDecoration(
+                                                      labelText: 'Ordenar por',
+                                                      border: OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                              Radius.circular(
+                                                                12,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                    ),
+                                              ),
+                                        ),
+                                        IconButton(
+                                          tooltip: sort.value.ascending
+                                              ? 'Ordem crescente'
+                                              : 'Ordem decrescente',
+                                          onPressed: () {
+                                            sort.value = _SortConfig(
+                                              column: sort.value.column,
+                                              ascending: !sort.value.ascending,
+                                            );
+                                            _saveUIPrefs();
+                                          },
+                                          icon: Icon(
+                                            sort.value.ascending
+                                                ? Icons.arrow_upward
+                                                : Icons.arrow_downward,
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            IconButton(
+                                              tooltip: 'Página anterior',
+                                              onPressed: safePage > 0
+                                                  ? () {
+                                                      page.value = safePage - 1;
+                                                      _saveUIPrefs();
+                                                    }
+                                                  : null,
+                                              icon: const Icon(
+                                                Icons.chevron_left,
+                                              ),
+                                            ),
+                                            Text(
+                                              'Página ${safePage + 1} de $totalPages',
+                                            ),
+                                            IconButton(
+                                              tooltip: 'Próxima página',
+                                              onPressed:
+                                                  (safePage + 1 < totalPages)
+                                                  ? () {
+                                                      page.value = safePage + 1;
+                                                      _saveUIPrefs();
+                                                    }
+                                                  : null,
+                                              icon: const Icon(
+                                                Icons.chevron_right,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ],
                                     ),
                                     const SizedBox(height: 6),
@@ -4165,7 +4333,11 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                             decoration: const InputDecoration(
                                                                               labelText: 'Total',
                                                                               border: OutlineInputBorder(
-                                                                                borderRadius: BorderRadius.all(Radius.circular(12)),
+                                                                                borderRadius: BorderRadius.all(
+                                                                                  Radius.circular(
+                                                                                    12,
+                                                                                  ),
+                                                                                ),
                                                                               ),
                                                                             ),
                                                                           ),
@@ -4194,7 +4366,9 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                       ],
                                                                     ),
                                                                   );
-                                                                  if (!context.mounted) return;
+                                                                  if (!context
+                                                                      .mounted)
+                                                                    return;
                                                                   if (ok ==
                                                                       true) {
                                                                     final parsed = int.tryParse(
@@ -4244,31 +4418,61 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                             .notes,
                                                                       );
 
-                                                                      final started = DateTime.now();
+                                                                      final started =
+                                                                          DateTime.now();
                                                                       showDialog(
-                                                                        context: context,
-                                                                        barrierDismissible: false,
-                                                                        barrierColor: Colors.black45,
+                                                                        context:
+                                                                            context,
+                                                                        barrierDismissible:
+                                                                            false,
+                                                                        barrierColor:
+                                                                            Colors.black45,
                                                                         builder: (_) => AlertDialog(
                                                                           content: Column(
-                                                                            mainAxisSize: MainAxisSize.min,
-                                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.min,
+                                                                            crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
                                                                             children: [
-                                                                              LinearProgressIndicator(minHeight: 6.0),
-                                                                              SizedBox(height: 12),
-                                                                              Text('Salvando alterações...'),
+                                                                              LinearProgressIndicator(
+                                                                                minHeight: 6.0,
+                                                                              ),
+                                                                              SizedBox(
+                                                                                height: 12,
+                                                                              ),
+                                                                              Text(
+                                                                                'Salvando alterações...',
+                                                                              ),
                                                                             ],
                                                                           ),
                                                                         ),
                                                                       );
                                                                       await _persistRecordsFromScreen();
-                                                                      final elapsed = DateTime.now().difference(started).inMilliseconds;
-                                                                      final wait = 800 - elapsed;
-                                                                      if (wait > 0) {
-            await dart_async.Future.delayed(Duration(milliseconds: wait));
+                                                                      final elapsed = DateTime.now()
+                                                                          .difference(
+                                                                            started,
+                                                                          )
+                                                                          .inMilliseconds;
+                                                                      final wait =
+                                                                          800 -
+                                                                          elapsed;
+                                                                      if (wait >
+                                                                          0) {
+                                                                        await dart_async
+                                                                            .Future.delayed(
+                                                                          Duration(
+                                                                            milliseconds:
+                                                                                wait,
+                                                                          ),
+                                                                        );
                                                                       }
-                                                                      if (context.mounted) {
-                                                                        Navigator.of(context, rootNavigator: true).pop();
+                                                                      if (context
+                                                                          .mounted) {
+                                                                        Navigator.of(
+                                                                          context,
+                                                                          rootNavigator:
+                                                                              true,
+                                                                        ).pop();
                                                                       }
                                                                       if (!context
                                                                           .mounted) {
@@ -4289,8 +4493,14 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                           ),
                                                                         ),
                                                                       );
-                                                                      dart_async.Future.microtask(() {
-                                                                        navigator.popUntil((route) => route.isFirst);
+                                                                      dart_async
+                                                                          .Future.microtask(() {
+                                                                        navigator.popUntil(
+                                                                          (
+                                                                            route,
+                                                                          ) => route
+                                                                              .isFirst,
+                                                                        );
                                                                       });
                                                                     }
                                                                   }
@@ -4360,7 +4570,11 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                               decoration: const InputDecoration(
                                                                                 labelText: 'Nome da reunião',
                                                                                 border: OutlineInputBorder(
-                                                                                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                                                                                  borderRadius: BorderRadius.all(
+                                                                                    Radius.circular(
+                                                                                      12,
+                                                                                    ),
+                                                                                  ),
                                                                                 ),
                                                                               ),
                                                                             ),
@@ -4372,7 +4586,11 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                               decoration: const InputDecoration(
                                                                                 labelText: 'Indicadores (separados por vírgula)',
                                                                                 border: OutlineInputBorder(
-                                                                                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                                                                                  borderRadius: BorderRadius.all(
+                                                                                    Radius.circular(
+                                                                                      12,
+                                                                                    ),
+                                                                                  ),
                                                                                 ),
                                                                               ),
                                                                             ),
@@ -4385,7 +4603,11 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                               decoration: const InputDecoration(
                                                                                 labelText: 'Total',
                                                                                 border: OutlineInputBorder(
-                                                                                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                                                                                  borderRadius: BorderRadius.all(
+                                                                                    Radius.circular(
+                                                                                      12,
+                                                                                    ),
+                                                                                  ),
                                                                                 ),
                                                                               ),
                                                                             ),
@@ -4397,7 +4619,11 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                               decoration: const InputDecoration(
                                                                                 labelText: 'Observações',
                                                                                 border: OutlineInputBorder(
-                                                                                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                                                                                  borderRadius: BorderRadius.all(
+                                                                                    Radius.circular(
+                                                                                      12,
+                                                                                    ),
+                                                                                  ),
                                                                                 ),
                                                                               ),
                                                                               maxLines: 3,
@@ -4428,7 +4654,9 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                       ],
                                                                     ),
                                                                   );
-                                                                  if (!context.mounted) return;
+                                                                  if (!context
+                                                                      .mounted)
+                                                                    return;
                                                                   if (ok ==
                                                                       true) {
                                                                     final newMeeting =
@@ -4504,41 +4732,78 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                             ? r.meetingType
                                                                             : newMeeting,
                                                                         notes:
-                                                                      newNotes.isEmpty
-                                                                          ? r.notes
-                                                                          : newNotes,
+                                                                            newNotes.isEmpty
+                                                                            ? r.notes
+                                                                            : newNotes,
                                                                       );
-                                                                      final started = DateTime.now();
+                                                                      final started =
+                                                                          DateTime.now();
                                                                       showDialog(
-                                                                        context: context,
-                                                                        barrierDismissible: false,
-                                                                        barrierColor: Colors.black45,
+                                                                        context:
+                                                                            context,
+                                                                        barrierDismissible:
+                                                                            false,
+                                                                        barrierColor:
+                                                                            Colors.black45,
                                                                         builder: (_) => AlertDialog(
                                                                           content: Column(
-                                                                            mainAxisSize: MainAxisSize.min,
-                                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.min,
+                                                                            crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
                                                                             children: [
-                                                                              LinearProgressIndicator(minHeight: 6.0),
-                                                                              SizedBox(height: 12),
-                                                                              Text('Salvando alterações...'),
+                                                                              LinearProgressIndicator(
+                                                                                minHeight: 6.0,
+                                                                              ),
+                                                                              SizedBox(
+                                                                                height: 12,
+                                                                              ),
+                                                                              Text(
+                                                                                'Salvando alterações...',
+                                                                              ),
                                                                             ],
                                                                           ),
                                                                         ),
                                                                       );
                                                                       await _persistRecordsFromScreen();
-                                                                      final elapsed = DateTime.now().difference(started).inMilliseconds;
-                                                                      final wait = 800 - elapsed;
-                                                                      if (wait > 0) {
-                    await dart_async.Future.delayed(Duration(milliseconds: wait));
+                                                                      final elapsed = DateTime.now()
+                                                                          .difference(
+                                                                            started,
+                                                                          )
+                                                                          .inMilliseconds;
+                                                                      final wait =
+                                                                          800 -
+                                                                          elapsed;
+                                                                      if (wait >
+                                                                          0) {
+                                                                        await dart_async
+                                                                            .Future.delayed(
+                                                                          Duration(
+                                                                            milliseconds:
+                                                                                wait,
+                                                                          ),
+                                                                        );
                                                                       }
-                                                                      if (context.mounted) {
-                                                                        Navigator.of(context, rootNavigator: true).pop();
+                                                                      if (context
+                                                                          .mounted) {
+                                                                        Navigator.of(
+                                                                          context,
+                                                                          rootNavigator:
+                                                                              true,
+                                                                        ).pop();
                                                                       }
-                                                                      if (!context.mounted) {
+                                                                      if (!context
+                                                                          .mounted) {
                                                                         return;
                                                                       }
-                                                                      final messenger = ScaffoldMessenger.of(context);
-                                                                      final navigator = Navigator.of(context);
+                                                                      final messenger =
+                                                                          ScaffoldMessenger.of(
+                                                                            context,
+                                                                          );
+                                                                      final navigator =
+                                                                          Navigator.of(
+                                                                            context,
+                                                                          );
                                                                       messenger.showSnackBar(
                                                                         const SnackBar(
                                                                           content: Text(
@@ -4546,8 +4811,14 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                           ),
                                                                         ),
                                                                       );
-                                                                      dart_async.Future.microtask(() {
-                                                                        navigator.popUntil((route) => route.isFirst);
+                                                                      dart_async
+                                                                          .Future.microtask(() {
+                                                                        navigator.popUntil(
+                                                                          (
+                                                                            route,
+                                                                          ) => route
+                                                                              .isFirst,
+                                                                        );
                                                                       });
                                                                     }
                                                                   }
@@ -4576,11 +4847,12 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                             'Cancelar',
                                                                           ),
                                                                         ),
-                                                                        material.FilledButton.icon(
+                                                                        material
+                                                                            .FilledButton.icon(
                                                                           onPressed: () => Navigator.of(ctx).pop(
                                                                             true,
                                                                           ),
-      icon: const Icon(
+                                                                          icon: const Icon(
                                                                             Icons.delete_forever,
                                                                           ),
                                                                           label: const material.Text(
@@ -4590,7 +4862,9 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                       ],
                                                                     ),
                                                                   );
-                                                                  if (!context.mounted) return;
+                                                                  if (!context
+                                                                      .mounted)
+                                                                    return;
                                                                   if (ok ==
                                                                       true) {
                                                                     final globalIndex = widget
@@ -4600,40 +4874,79 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                         );
                                                                     if (globalIndex >=
                                                                         0) {
-                                                                      final started = DateTime.now();
+                                                                      final started =
+                                                                          DateTime.now();
                                                                       showDialog(
-                                                                        context: context,
-                                                                        barrierDismissible: false,
-                                                                        barrierColor: Colors.black45,
+                                                                        context:
+                                                                            context,
+                                                                        barrierDismissible:
+                                                                            false,
+                                                                        barrierColor:
+                                                                            Colors.black45,
                                                                         builder: (_) => AlertDialog(
                                                                           content: Column(
-                                                                            mainAxisSize: MainAxisSize.min,
-                                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.min,
+                                                                            crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
                                                                             children: [
-                                                                              LinearProgressIndicator(minHeight: 6.0),
-                                                                              SizedBox(height: 12),
-                                                                              Text('Removendo registro...'),
+                                                                              LinearProgressIndicator(
+                                                                                minHeight: 6.0,
+                                                                              ),
+                                                                              SizedBox(
+                                                                                height: 12,
+                                                                              ),
+                                                                              Text(
+                                                                                'Removendo registro...',
+                                                                              ),
                                                                             ],
                                                                           ),
                                                                         ),
                                                                       );
-                                                                      widget.records.removeAt(
-                                                                        globalIndex,
-                                                                      );
+                                                                      widget
+                                                                          .records
+                                                                          .removeAt(
+                                                                            globalIndex,
+                                                                          );
                                                                       await _persistRecordsFromScreen();
-                                                                      final elapsed = DateTime.now().difference(started).inMilliseconds;
-                                                                      final wait = 800 - elapsed;
-                                                                      if (wait > 0) {
-                    await dart_async.Future.delayed(Duration(milliseconds: wait));
+                                                                      final elapsed = DateTime.now()
+                                                                          .difference(
+                                                                            started,
+                                                                          )
+                                                                          .inMilliseconds;
+                                                                      final wait =
+                                                                          800 -
+                                                                          elapsed;
+                                                                      if (wait >
+                                                                          0) {
+                                                                        await dart_async
+                                                                            .Future.delayed(
+                                                                          Duration(
+                                                                            milliseconds:
+                                                                                wait,
+                                                                          ),
+                                                                        );
                                                                       }
-                                                                      if (context.mounted) {
-                                                                        Navigator.of(context, rootNavigator: true).pop();
+                                                                      if (context
+                                                                          .mounted) {
+                                                                        Navigator.of(
+                                                                          context,
+                                                                          rootNavigator:
+                                                                              true,
+                                                                        ).pop();
                                                                       }
-                                                                      if (!context.mounted) {
+                                                                      if (!context
+                                                                          .mounted) {
                                                                         return;
                                                                       }
-                                                                      final messenger = ScaffoldMessenger.of(context);
-                                                                      final navigator = Navigator.of(context);
+                                                                      final messenger =
+                                                                          ScaffoldMessenger.of(
+                                                                            context,
+                                                                          );
+                                                                      final navigator =
+                                                                          Navigator.of(
+                                                                            context,
+                                                                          );
                                                                       messenger.showSnackBar(
                                                                         const SnackBar(
                                                                           content: Text(
@@ -4641,23 +4954,33 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                           ),
                                                                         ),
                                                                       );
-                                                                      dart_async.Future.microtask(() {
-                                                                        navigator.popUntil((route) => route.isFirst);
+                                                                      dart_async
+                                                                          .Future.microtask(() {
+                                                                        navigator.popUntil(
+                                                                          (
+                                                                            route,
+                                                                          ) => route
+                                                                              .isFirst,
+                                                                        );
                                                                       });
                                                                     }
                                                                   }
                                                                 }
                                                               },
                                                               itemBuilder: (context) => const [
-                                                                PopupMenuItem<int>(
+                                                                PopupMenuItem<
+                                                                  int
+                                                                >(
                                                                   value: 1,
                                                                   child: Row(
                                                                     children: [
                                                                       Icon(
-                                                                        Icons.edit,
+                                                                        Icons
+                                                                            .edit,
                                                                       ),
                                                                       SizedBox(
-                                                                        width: 8,
+                                                                        width:
+                                                                            8,
                                                                       ),
                                                                       Text(
                                                                         'Editar',
@@ -4665,15 +4988,19 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                                     ],
                                                                   ),
                                                                 ),
-                                                                PopupMenuItem<int>(
+                                                                PopupMenuItem<
+                                                                  int
+                                                                >(
                                                                   value: 2,
                                                                   child: Row(
                                                                     children: [
                                                                       Icon(
-                                                                        Icons.delete,
+                                                                        Icons
+                                                                            .delete,
                                                                       ),
                                                                       SizedBox(
-                                                                        width: 8,
+                                                                        width:
+                                                                            8,
                                                                       ),
                                                                       Text(
                                                                         'Excluir',
@@ -4687,11 +5014,13 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                         ),
                                                       ],
                                                     ),
-                const SizedBox(height: 4),
-                Text(
-                  'Reunião: ${r.meetingType}',
-                ),
-                                                    const material.SizedBox(height: 4),
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      'Reunião: ${r.meetingType}',
+                                                    ),
+                                                    const material.SizedBox(
+                                                      height: 4,
+                                                    ),
                                                     material.Wrap(
                                                       spacing: 8,
                                                       runSpacing: 8,
@@ -4703,7 +5032,9 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                           ),
                                                       ],
                                                     ),
-                                                    const material.SizedBox(height: 8),
+                                                    const material.SizedBox(
+                                                      height: 8,
+                                                    ),
                                                     material.Row(
                                                       children: [
                                                         material.Text(
@@ -4782,10 +5113,13 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                                 },
                                               ),
                                               DataColumn(
-                                                label: const Text('Indicadores'),
+                                                label: const Text(
+                                                  'Indicadores',
+                                                ),
                                                 onSort: (_, asc) {
                                                   sort.value = _SortConfig(
-                                                    column: SortColumn.indicators,
+                                                    column:
+                                                        SortColumn.indicators,
                                                     ascending: asc,
                                                   );
                                                   page.value = 0;
@@ -4863,11 +5197,7 @@ class _RecordsScreenState extends State<_RecordsScreen> {
     );
   }
 
-  void _showRecordModal(
-    List<_Record> records,
-    int index,
-    DateFormat df,
-  ) async {
+  void _showRecordModal(List<_Record> records, int index, DateFormat df) async {
     final r = records[index];
     final theme = Theme.of(context);
     await material.showDialog<void>(
@@ -4913,13 +5243,15 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                         ),
                       ),
                       const material.SizedBox(height: 4),
-                      material.Text('Ocupados: ${r.occupied}    Em pé: ${r.standing}'),
+                      material.Text(
+                        'Ocupados: ${r.occupied}    Em pé: ${r.standing}',
+                      ),
                     ],
                   ),
                 ),
                 const material.SizedBox(height: 12),
                 material.ListTile(
-      leading: const Icon(Icons.calendar_today),
+                  leading: const Icon(Icons.calendar_today),
                   title: material.Text(df.format(r.dateTime)),
                 ),
                 ListTile(
@@ -4999,7 +5331,7 @@ class _RecordsScreenState extends State<_RecordsScreen> {
               IconButton(
                 tooltip: 'Editar',
                 icon: const Icon(Icons.edit),
-              onPressed: () async {
+                onPressed: () async {
                   final meetingCtrl = TextEditingController(
                     text: r.meetingType,
                   );
@@ -5024,13 +5356,17 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                 decoration: const material.InputDecoration(
                                   labelText: 'Nome da reunião',
                                   border: material.OutlineInputBorder(
-                                    borderRadius: material.BorderRadius.all(Radius.circular(12)),
+                                    borderRadius: material.BorderRadius.all(
+                                      Radius.circular(12),
+                                    ),
                                   ),
                                 ),
                                 validator: (v) {
                                   final t = v?.trim() ?? '';
-                                  if (t.isEmpty) return 'Informe o nome da reunião';
-                                  if (t.length > 60) return 'Máximo de 60 caracteres';
+                                  if (t.isEmpty)
+                                    return 'Informe o nome da reunião';
+                                  if (t.length > 60)
+                                    return 'Máximo de 60 caracteres';
                                   return null;
                                 },
                               ),
@@ -5041,7 +5377,9 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                   labelText:
                                       'Nomes dos indicadores (separados por vírgula)',
                                   border: material.OutlineInputBorder(
-                                    borderRadius: material.BorderRadius.all(Radius.circular(12)),
+                                    borderRadius: material.BorderRadius.all(
+                                      Radius.circular(12),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -5051,14 +5389,17 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                                 decoration: const material.InputDecoration(
                                   labelText: 'Notas (opcional)',
                                   border: material.OutlineInputBorder(
-                                    borderRadius: material.BorderRadius.all(Radius.circular(12)),
+                                    borderRadius: material.BorderRadius.all(
+                                      Radius.circular(12),
+                                    ),
                                   ),
                                 ),
                                 maxLines: 3,
                                 validator: (v) {
                                   final t = v?.trim() ?? '';
                                   if (t.isEmpty) return null;
-                                  if (t.length > 200) return 'Máximo de 200 caracteres';
+                                  if (t.length > 200)
+                                    return 'Máximo de 200 caracteres';
                                   return null;
                                 },
                               ),
@@ -5073,7 +5414,8 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                         ),
                         material.FilledButton(
                           onPressed: () {
-                            final valid = formKey.currentState?.validate() ?? false;
+                            final valid =
+                                formKey.currentState?.validate() ?? false;
                             if (valid) Navigator.of(ctx).pop(true);
                           },
                           child: const material.Text('Salvar'),
@@ -5112,7 +5454,9 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                           mainAxisSize: material.MainAxisSize.min,
                           crossAxisAlignment: material.CrossAxisAlignment.start,
                           children: [
-                            const material.LinearProgressIndicator(minHeight: 6.0),
+                            const material.LinearProgressIndicator(
+                              minHeight: 6.0,
+                            ),
                             const material.SizedBox(height: 12),
                             const material.Text('Salvando alterações...'),
                           ],
@@ -5120,10 +5464,14 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                       ),
                     );
                     await _persistRecordsFromScreen();
-                    final elapsed = DateTime.now().difference(started).inMilliseconds;
+                    final elapsed = DateTime.now()
+                        .difference(started)
+                        .inMilliseconds;
                     final wait = 800 - elapsed;
                     if (wait > 0) {
-                    await dart_async.Future.delayed(Duration(milliseconds: wait));
+                      await dart_async.Future.delayed(
+                        Duration(milliseconds: wait),
+                      );
                     }
                     if (context.mounted) {
                       Navigator.of(context, rootNavigator: true).pop();
@@ -5134,7 +5482,7 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                     messenger.showSnackBar(
                       const SnackBar(content: Text('Registro atualizado')),
                     );
-            dart_async.Future.microtask(() {
+                    dart_async.Future.microtask(() {
                       navigator.popUntil((route) => route.isFirst);
                     });
                   }
@@ -5174,10 +5522,13 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                   material.showDialog(
                     context: context,
                     barrierDismissible: false,
-                    builder: (_) =>
-                        const material.Center(child: material.CircularProgressIndicator()),
+                    builder: (_) => const material.Center(
+                      child: material.CircularProgressIndicator(),
+                    ),
                   );
-                  await dart_async.Future.delayed(const Duration(milliseconds: 300));
+                  await dart_async.Future.delayed(
+                    const Duration(milliseconds: 300),
+                  );
                   await Share.share(csv);
                   if (!context.mounted) return;
                   Navigator.of(context, rootNavigator: true).pop();
@@ -5205,7 +5556,9 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                           if ((r.notes ?? '').isNotEmpty)
                             material.Text('Notas: ${r.notes}'),
                           const material.SizedBox(height: 8),
-                          const material.Text('Essa ação não pode ser desfeita.'),
+                          const material.Text(
+                            'Essa ação não pode ser desfeita.',
+                          ),
                         ],
                       ),
                       actions: [
@@ -5235,7 +5588,9 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                           mainAxisSize: material.MainAxisSize.min,
                           crossAxisAlignment: material.CrossAxisAlignment.start,
                           children: [
-                            const material.LinearProgressIndicator(minHeight: 6.0),
+                            const material.LinearProgressIndicator(
+                              minHeight: 6.0,
+                            ),
                             const material.SizedBox(height: 12),
                             const material.Text('Excluindo...'),
                           ],
@@ -5244,10 +5599,14 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                     );
                     records.removeAt(index);
                     await _persistRecordsFromScreen();
-                    final elapsed = DateTime.now().difference(started).inMilliseconds;
+                    final elapsed = DateTime.now()
+                        .difference(started)
+                        .inMilliseconds;
                     final wait = 800 - elapsed;
                     if (wait > 0) {
-                    await dart_async.Future.delayed(Duration(milliseconds: wait));
+                      await dart_async.Future.delayed(
+                        Duration(milliseconds: wait),
+                      );
                     }
                     if (context.mounted) {
                       Navigator.of(context, rootNavigator: true).pop();
@@ -5260,7 +5619,7 @@ class _RecordsScreenState extends State<_RecordsScreen> {
                     messenger.showSnackBar(
                       const SnackBar(content: Text('Registro removido')),
                     );
-            dart_async.Future.microtask(() {
+                    dart_async.Future.microtask(() {
                       navigator.popUntil((route) => route.isFirst);
                     });
                   }
@@ -5454,18 +5813,18 @@ class _IndicatorInputState extends State<_IndicatorInput> {
       children: [
         TextField(
           controller: _ctrl,
-                                decoration: InputDecoration(
-                                  labelText: 'Adicionar nomes dos indicadores',
-                                  hintText: 'Adicionar nomes dos indicadores',
-                                  hintStyle: const TextStyle(fontSize: 14),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 14,
-                                  ),
-                                  border: const OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                                  ),
-                                  suffixIcon: MouseRegion(
+          decoration: InputDecoration(
+            labelText: 'Adicionar nomes dos indicadores',
+            hintText: 'Adicionar nomes dos indicadores',
+            hintStyle: const TextStyle(fontSize: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 14,
+            ),
+            border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+            suffixIcon: MouseRegion(
               onEnter: (_) => setState(() => _hoverAdd = true),
               onExit: (_) => setState(() => _hoverAdd = false),
               child: GestureDetector(
@@ -5607,7 +5966,10 @@ class _OverflowHint extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 '$count',
-                style: material.TextStyle(color: fg, fontWeight: material.FontWeight.w600),
+                style: material.TextStyle(
+                  color: fg,
+                  fontWeight: material.FontWeight.w600,
+                ),
               ),
             ],
           ),
